@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+#message-text {
+    border-radius: 5px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+#message-text.error {
+    color: red;
+}
+
+#message-text.success {
+    color: green;
+}
+
+.container {
+    max-width: 1500px;
+    width: 1500px;
+}
+
+
+.table-container {
+    max-height: 700px;
+    overflow-y: auto;
+}
+
+
+table {
+    width: 100%;
+}
+
+.table-container thead th{
+    position: sticky;
+    top: 0;
+    background-color: #d0d0af;
+    z-index: 2;
+}
+.table-wrapper {
+        position: relative;
+        height: 600px; /* Set the desired height of the table */
+        overflow: auto;
+    }
+
+.table-wrapper thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+input {
+        border: 1px solid #aaa !important;
+        border-radius: 0.25rem;
+    }
+
+input[type="search"] {
+  background-color: white !important;
+  width: 250px !important;
+}
+
+.form-check-input:checked[type=checkbox]{
+  background-image: none;
+}
+
+
+
+    
+</style>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/css/bootstrap.min.css"> -->
+  <title>Error Form</title>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-3">
+        <h1 class="mb-4" style="margin-top: 50px;">Error Submit</h1>
+        <form id="errorForm">
+          <div class="mb-3">
+            <label for="lead-number" class="form-label">Lead Number</label>
+            <input type="text" class="form-control" style="width: 300px;" id="lead-number" name="lead-number" placeholder="Enter Lead Number">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Error Type</label>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="noVAT" name="errorType" value="No VAT">
+              <label class="form-check-label" for="noVAT">No VAT</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="notLocalSeller" name="errorType" value="Not Local Seller">
+              <label class="form-check-label" for="notLocalSeller">Not Local Seller</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="NoRevenue" name="errorType" value="No Revenue">
+              <label class="form-check-label" for="NoRevenue">No Revenue</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="NoCompanyNameorProductCount" name="errorType" value="No Company Name or Product Count">
+              <label class="form-check-label" for="NoCompanyNameorProductCount">No Company Name or Product Count</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="wrongVAT" name="errorType" value="Wrong VAT">
+              <label class="form-check-label" for="wrongVAT">Wrong VAT</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="wrongCluster" name="errorType" value="Wrong Cluster">
+              <label class="form-check-label" for="wrongCluster">Wrong Cluster</label>
+            </div>
+            
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="wrongDesOrImg" name="errorType" value="Wrong Desc or Image">
+              <label class="form-check-label" for="Wrong Description or Image">Wrong Description or Image</label>
+            </div>
+            
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="WrongPRODUCTSERVICE" name="errorType" value="Wrong PRODUCT/SERVICE">
+              <label class="form-check-label" for="WrongPRODUCTSERVICE">Wrong PRODUCT/SERVICE</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="other" name="errorType" value="Other">
+              <label class="form-check-label" for="other">Other</label>
+            </div>
+          </div>
+          <div class="row"><div class="col-md-6"><button id="submit-error" type="submit" class="btn btn-primary">Submit Error</button></div>
+          <div class="col-md-6"><button id="delete-error" type="button" class="btn btn-secondary">Delete Error</button></div></div>
+        </form>
+      </div>
+      <div class="col-md-9">
+        <h1 class="mb-4" style="margin-top: 50px;">Error Records</h1>
+          <div class="row">
+            <div class="filters">
+                <label for="lead_number_filter" hidden>Lead Number:</label>
+                <input type="text" id="lead_number_filter" hidden>
+    
+                <label for="error_date_filter">Error Date:</label>
+                <input type="date" id="error_date_filter">
+            </div>            
+        </div>
+        <div class="row" style="margin-top: 10px;">
+          <div class="table-container">
+          <div>
+            <table id="error-table" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">id</th>
+                        <th scope="col">Lead Number</th>
+                        <th scope="col">PIC</th>
+                        <th scope="col">Error Type</th>
+                        <th scope="col">Error Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for error in errors %}
+                    <tr>
+                        <td>{{ error[0] }}</td>
+                        <td>{{ error[1] }}</td>
+                        <td>{{ error[2] }}</td>
+                        <td>{{ error[3] }}</td>
+                        <td>{{ error[4] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+          </div>
+        </div>
+        
+    </div>
+    </div>
+  </div>
+
+
+
+
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/js/bootstrap.bundle.min.js"></script> -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script>
+      $(document).ready(function () {
+          $('#error-table').DataTable({
+            scrollY:          500,
+              paging: false, // Disable pagination
+              info: false, // Disable information display
+              order: [], // Disable initial sorting
+              info: true, // Enable information display
+              language: {
+                  emptyTable: 'No data available', // Message shown when the table has no data
+                  info: 'Showing _START_ to _END_ of _TOTAL_ entries', // Customize the display of entries information
+                  infoEmpty: 'Showing 0 entries', // Message shown when there are no entries
+                  infoFiltered: '(filtered from _MAX_ total entries)', // Customize the display of filtered entries information
+              }
+          });
+      });
+  </script>
+
+  <script>
+    var leadNumberFilter = document.querySelector("#lead_number_filter");
+    var errorDateFilter = document.querySelector("#error_date_filter");
+    var errorTable = document.querySelector("#error-table");
+  
+    leadNumberFilter.addEventListener("input", applyFilters);
+    errorDateFilter.addEventListener("input", applyFilters);
+  
+    function applyFilters() {
+      var leadNumberValue = leadNumberFilter.value.trim().toLowerCase();
+      var errorDateValue = errorDateFilter.value;
+  
+      var rows = errorTable.querySelectorAll("tbody tr");
+  
+      rows.forEach(function(row) {
+        var leadNumber = row.cells[1].textContent.toLowerCase();
+        var errorDate = row.cells[4].textContent;
+        var showRow = true;
+  
+        if (leadNumberValue && !leadNumber.includes(leadNumberValue)) {
+          showRow = false;
+        }
+  
+        if (errorDateValue) {
+          var formattedErrorDate = formatDateDisplay(errorDate);
+          if (!formattedErrorDate || formattedErrorDate !== errorDateValue) {
+            showRow = false;
+          }
+        }
+  
+        row.style.display = showRow ? "" : "none";
+      });
+    }
+  
+    function formatDateDisplay(dateString) {
+      // Convert date string from "dd/mm/yyyy" to "yyyy-mm-dd"
+      var parts = dateString.split("/");
+      if (parts.length === 3) {
+        var day = parts[0];
+        var month = parts[1];
+        var year = parts[2];
+  
+        // Ensure day, month, and year are valid numbers
+        if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+          return year + "-" + month.padStart(2, '0') + "-" + day.padStart(2, '0');
+        }
+      }
+      return null;
+    }
+  </script>
+  
+  
+
+
+
+  <script>
+    var submitButton = document.querySelector("#submit-error");
+    // Submit form data to the database
+    document.getElementById('errorForm').addEventListener('submit', function (e) {
+      var get_cookies = getCookie('role');
+      console.log(get_cookies)
+      if (get_cookies == 'user') {
+        window.location.href = '/form';
+        alert('Permission denied!');
+      }
+      else{
+        e.preventDefault(); // Prevent the form from submitting traditionally
+      var existingMessage = document.querySelector("#message-text");
+        if (existingMessage) {
+        existingMessage.parentNode.removeChild(existingMessage);
+        }
+  
+      // Retrieve form values
+      var leadNumber = document.getElementById('lead-number').value;
+      console.log(leadNumber)
+      if (leadNumber === '') {
+        showMessage_error('Please enter Lead Number!');
+        return; // Stop further execution
+      }
+      else{
+        var errorTypes = Array.from(document.querySelectorAll('input[name="errorType"]:checked')).map(function (checkbox) {
+        return checkbox.value;
+        });
+    
+        // Create an object with form data
+        var formData = {
+            leadNumber: leadNumber,
+            errorTypes: errorTypes
+        };
+    
+        // Send the form data to the database
+        fetch('/save-error-data', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(function (response) {
+                    return response.json();
+            })
+            .then(function (data) {
+                if (data.message === 'success') {
+                    // Display success message and update the error records
+                    showMessage_success('Error data submitted successfully.');
+                    location.reload();
+                } else {
+                    // Display error message
+                    showMessage_error(data.message);
+                }
+            })
+            .catch(function (error) {
+                // Display error message
+                showMessage_error('Error submitting error data: ' + error);
+            });
+      }
+      }
+      
+      
+    });
+
+    var deleteButton = document.querySelector("#delete-error");
+var leadNumberInput = document.querySelector("#lead-number");
+
+// Delete error data
+deleteButton.addEventListener("click", function(event) {
+  var get_cookies = getCookie('role');
+  console.log(get_cookies)
+  if (get_cookies == 'user') {
+    window.location.href = '/form';
+    alert('Permission denied!');
+  }
+  else{
+    event.preventDefault();
+    var leadNumber = leadNumberInput.value.trim();
+    var existingMessage = document.querySelector("#message-text");
+
+    if (existingMessage) {
+      existingMessage.parentNode.removeChild(existingMessage);
+    }
+
+    fetch('/delete-error-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ leadNumber: leadNumber })
+    })
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      if (data.message === 'success') {
+        // Display success message and update the error records
+        showMessage_success_delete('Error data deleted successfully.');
+        location.reload();
+      } else {
+        // Display error message
+        showMessage_error_delete(data.message);
+      }
+    })
+    .catch(function(error) {
+      // Display error message
+      showMessage_error('Error deleting error data: ' + error);
+    });
+  }
+  
+});
+
+
+  
+    // Function to display the message text
+    function showMessage_error(message) {
+        var messageText = document.createElement("div");
+        messageText.id = "message-text";
+        messageText.innerText = message;
+        messageText.className = "error";
+        submitButton.parentNode.insertBefore(messageText, submitButton.nextSibling);
+    }
+
+    // Function to display the message text
+    function showMessage_success(message) {
+        var messageText = document.createElement("div");
+        messageText.id = "message-text";
+        messageText.innerText = message;
+        messageText.className = "success";
+        submitButton.parentNode.insertBefore(messageText, submitButton.nextSibling);
+    }
+
+    // Function to display the message text
+    function showMessage_error_delete(message) {
+        var messageText = document.createElement("div");
+        messageText.id = "message-text";
+        messageText.innerText = message;
+        messageText.className = "error";
+        deleteButton.parentNode.insertBefore(messageText, deleteButton.nextSibling);
+    }
+
+    // Function to display the message text
+    function showMessage_success_delete(message) {
+        var messageText = document.createElement("div");
+        messageText.id = "message-text";
+        messageText.innerText = message;
+        messageText.className = "success";
+        deleteButton.parentNode.insertBefore(messageText, deleteButton.nextSibling);
+    }
+  </script>
+
+<script>
+  
+  function getCookie(cookieName) {
+        let cookie = {};
+        document.cookie.split(';').forEach(function(el) {
+            let [key,value] = el.split('=');
+            cookie[key.trim()] = value;
+        })
+        return cookie[cookieName];
+        }
+
+</script>
+  
+  
+</body>
+
+{% endblock %}

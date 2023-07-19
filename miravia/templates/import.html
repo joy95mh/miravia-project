@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- <h1 style="font-weight: bold;">IMPORT DATA</h1> -->
+<style>
+    #importForm {
+        margin-top: 100px;
+        margin-left: 110px;
+    }
+    .form-control {
+        width: 60%;
+    }
+    .form-control-lg {
+        font-size: 1.2rem;
+    }
+
+    .message-text {
+        margin-top: 10px;
+        color: red;
+        font-weight: bold;
+    }
+
+    .loading-icon {
+        display: none;
+        margin-left: 10px;
+    }
+</style>
+<form id="importForm" enctype="multipart/form-data">
+    <div class="form-group">
+        <div class="mb-3">
+            <label for="formFile" class="form-label">IMPORT DATA</label>
+            <input class="form-control" type="file" id="formFile">
+        </div>
+    </div>
+    <button id="import-button" type="submit" class="form-control-lg btn-primary">Import<span class="loading-icon"><i class="fa fa-spinner fa-spin"></i></span></button>
+
+    <p class="message-text" id="messageText"></p>
+</form>
+<p class="message-text" id="messageTextTable" style="margin-left: 110px;"></p>
+<table id="importTable" class="table table-striped" style="display: none; margin-left: 110px">
+    <thead>
+        <tr>
+            <th>Assignment Date</th>
+            <th>LEAD NUMBER</th>
+            <th>Source</th>
+            <th>Lead ID</th>
+            <th>LINK/URL</th>
+            <th>PRODUCT/SERVICE</th>
+            <th>LOCAL SPANISH SELLER</th>
+            <th>VAT</th>
+            <th>CLUSTER</th>
+            <th>L1</th>
+            <th>L2</th>
+            <th>COMPANY NAME</th>
+            <th>REVENUE</th>
+            <th>PRODUCT COUNT</th>
+            <th>PRODUCT DESCRIPTION OR AT LEAST 2 PRODUCT IMAGES</th>
+            <th>AMOUNT OF PHONE NUMBERS?</th>
+            <th>TELEPHONE</th>
+            <th>TELEPHONE1</th>
+            <th>AMOUNT OF EMAILS</th>
+            <th>EMAIL</th>
+            <th>EMAIL1</th>
+            <th>Feedback Final</th>
+            <th>QUALIFICATION FEEDBACK</th>        
+        </tr>
+    </thead>
+    <tbody id="importTableBody"></tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        var get_cookies = getCookie('role');
+        console.log(get_cookies)
+        if (get_cookies == 'user' || get_cookies === '' || typeof get_cookies === 'undefined') {
+            window.location.href = '/';
+            alert('Permission denied!');
+        }
+
+        $('#importForm').submit(function(event) {
+            var existingMessage = document.querySelector("#message-text");
+            if (existingMessage) {
+                existingMessage.parentNode.removeChild(existingMessage);
+            }
+            event.preventDefault(); // Prevent default form submission
+
+            var formData = new FormData();
+            var fileInput = document.getElementById('formFile');
+            if (!fileInput.files[0]) {
+                $('#messageText').text('Please choose a file for import.').css('color', 'red');
+                return;
+            }
+            formData.append('file', fileInput.files[0]);
+
+            $.ajax({
+                url: '/check_file',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.exists) {
+                        // File already exists, show confirmation dialog
+                        var confirmation = confirm('The file already exists. Do you want to OVERWRITE it?');
+                        if (confirmation) {
+                            // User confirmed, proceed with import
+                            importFile(formData);
+                        } else {
+                            // User canceled, display message
+                            $('#messageText').text('Import canceled.').css('color', 'red');
+                            // Hide loading icon
+                            $('.loading-icon').hide();
+                        }
+                    } else {
+                        // File doesn't exist, proceed with import
+                        importFile(formData);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response
+                    console.error('File check request failed:', error);
+                    $('#messageText').text('Error during file check!\n' + error).css('color', 'red');
+                    // Hide loading icon
+                    $('.loading-icon').hide();
+                }
+            });
+        });
+
+        function importFile(formData) {
+            // Disable the export button
+            var exportButton = document.getElementById('import-button');
+            exportButton.disabled = true;
+            $('#messageText').empty();
+            $('.loading-icon').show();
+            $.ajax({
+                url: '/import',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    var totalRows = response.total;
+                    var insertedRows = response.rows_inserted;
+                    var duplicateRows = response.duplicate_rows;
+                    var error = response.error;
+
+                    if (error) {
+                        $('#messageText').text('Error during import! ' + formData.get('file').name + ' - ' + error).css('color', 'red');
+                    } else {
+                        // Handle successful import response
+                        var messageText = 'Imported! ' + formData.get('file').name + '<br>File total: <span style="color: blue;">' + totalRows + '</span>' + '<br>Inserted: <span style="color: green;">' + insertedRows + '</span>' + '<br><span style="color: red;">Duplicate: ' + duplicateRows + '</span>';
+                        $('#messageText').html(messageText).css('color', 'darkgreen');
+                        $('#messageTextTable').text('Display first 50 lines..').css({'color': 'gray', 'font-style': 'italic'});
+
+                        // Display imported data in the table
+                        var importedData = response.imported_data;
+                        var importTableBody = $('#importTableBody');
+                        importTableBody.empty();
+                        $.each(importedData, function(index, rowData) {
+                            var row = $('<tr>');
+                            $.each(rowData, function(key, value) {
+                                row.append($('<td>').text(value));
+                            });
+                            importTableBody.append(row);
+                        });
+
+                        // Show the table
+                        $('#importTable').show();
+                    }
+
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response
+                    console.error('Import request failed:', error.message);
+                    $('#messageText').text('Error during import! ' + formData.get('file').name + ' - ' + error).css('color', 'red');
+                },
+                complete: function() {
+                    // Hide loading icon
+                    $('.loading-icon').hide();
+                    // Enable the export button
+                    exportButton.disabled = false;
+                }
+            });
+        }
+    });
+
+    function getCookie(cookieName) {
+        let cookie = {};
+        document.cookie.split(';').forEach(function(el) {
+            let [key, value] = el.split(';');
+            cookie[key.trim()] = value;
+        })
+        return cookie[cookieName];
+    }
+</script>
+
+{% endblock %}

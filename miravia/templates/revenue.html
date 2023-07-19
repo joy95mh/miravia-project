@@ -1,0 +1,769 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.84.0">
+    <title>Dashboard Template · Bootstrap v5.0</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/dashboard/">
+
+    
+
+    <!-- Bootstrap core CSS -->
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+
+
+      .container-fluid{
+        margin-top: 80px;
+      }
+
+      .table th {
+        max-width: 110px;
+        width: 110px;
+        font-weight: bold;
+      }
+
+      .table td {
+        max-width: 110px;
+        width: 110px;
+      }
+      
+
+
+      .monthPicker {
+    background: #086565;
+    box-shadow: 0 1px 5px #696969;
+      }
+
+      .monthPicker-top {
+          display: -webkit-box;
+          display: -ms-flexbox;
+          display: flex;
+          padding: 20px 20px;
+          border-bottom: 1px solid #fff;
+          -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+          justify-content: space-between;
+      }
+
+      .monthPicker-top-action {
+          font-size: 2rem;
+          position: relative;
+          width: 45px;
+          height: 45px;
+          color: #fff;
+          border-radius: 50%;
+          background: none;
+      }
+
+      .monthPicker-top-action span {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+      }
+
+      .monthPicker-top-action:hover {
+          background: rgba(0, 0, 0, .1);
+      }
+
+      .monthPicker-top-current {
+          color: #008080;
+          background: #fff;
+      }
+
+      .monthPicker-top-current .selectYear {
+          display: none;
+      }
+
+      .monthPicker-top-current:hover .currentYear {
+          display: none;
+      }
+
+      .monthPicker-top-current:hover .selectYear {
+          display: inline;
+      }
+
+      .monthPicker-body {
+          display: -webkit-box;
+          display: -ms-flexbox;
+          display: flex;
+          padding: 0.7rem;
+          text-align: center;
+          -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+          -ms-flex-pack: distribute;
+          justify-content: space-around;
+      }
+
+      .monthPicker-body-month {
+          line-height: 35px;
+          height: 35px;
+          margin: 5px;
+          vertical-align: middle;
+          text-decoration: none;
+          color: #008080;
+          color: #fff;
+          border-radius: 3px;
+          background: #fff;
+          background: none;
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 calc(100% / 3 - 10px);
+          flex: 0 0 calc(100% / 3 - 10px);
+      }
+
+      .monthPicker-body-month:hover {
+          text-decoration: none;
+          color: #fff;
+          box-shadow: 0 0px 5px rgba(0, 0, 0, .34);
+      }
+
+      .active {
+        background: #26b547 !important; /* Set the background color for the active month */
+        color: #fff !important; /* Set the text color for the active month */
+      }
+
+      .bold {
+        font-weight: bold;
+      }
+
+      #revenue-table thead th {
+        position: relative;
+        cursor: pointer;
+      }
+
+      body {
+        font-size: .8rem;
+        line-height: 1;
+      }
+      
+    </style>
+
+    
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='css/dashboard.css')}}" rel="stylesheet">
+  </head>
+  <body>
+    
+    <div class="container-fluid">
+      <div class="row">
+        <main class="col-md-3">
+          <div class="monthPicker">
+            <div class="monthPicker-top">
+              <button class="monthPicker-top-action btn" id="prevYearBtn">
+                <span class="fa fa-angle-left"></span>
+              </button>
+              <button class="monthPicker-top-current btn" id="currentYearBtn">
+                <span class="currentYear">Year 2023</span>
+                <span class="selectYear">Year 2023</span>
+              </button>
+              <button class="monthPicker-top-action btn" id="nextYearBtn">
+                <span class="fa fa-angle-right"></span>
+              </button>
+            </div>
+            
+            <div class="monthPicker-body">
+              <a href="#" class="monthPicker-body-month {% if selected_month == 1 %}active{% endif %}" data-month="1"><span>25/12-21/01</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 2 %}active{% endif %}" data-month="2"><span>22/01-21/02</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 3 %}active{% endif %}" data-month="3"><span>22/02-21/03</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 4 %}active{% endif %}" data-month="4"><span>22/03-21/04</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 5 %}active{% endif %}" data-month="5"><span>22/04-21/05</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 6 %}active{% endif %}" data-month="6"><span>22/05-21/06</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 7 %}active{% endif %}" data-month="7"><span>22/06-21/07</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 8 %}active{% endif %}" data-month="8"><span>22/07-21/08</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 9 %}active{% endif %}" data-month="9"><span>22/08-21/09</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 10 %}active{% endif %}" data-month="10"><span>22/09-23/10</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 11 %}active{% endif %}" data-month="11"><span>24/10-23/11</span></a>
+              <a href="#" class="monthPicker-body-month {% if selected_month == 12 %}active{% endif %}" data-month="12"><span>24/11-22/12</span></a>
+            </div>
+          </div>
+        </main>
+    
+        <main class="col-md-9">
+          <h6 style="margin-left: 5px; color: #7a7a7a; font-family: auto;">Records</h6>
+    
+          <canvas class="w-100" id="myChart" width="900" height="200"><span id="revenue_data" hidden>{{ revenue_data }}</span><span id="paidlines_data" hidden>{{ paidlines_data }}</span><span id="error_count_data" hidden>{{ error_count_data }}</span></canvas>
+        </main>
+    
+        <div class="row">
+          <div class="col-md-6">
+            <h2 style="font-family: 'Font Awesome 5 Free';">Revenue Board</h2>
+          </div>
+          <div class="col-md-4">
+            <button type="button" style="margin-bottom: 5px; width: 250px;" class="col-md-2 btn btn-primary" onclick="exportToExcel_RevenueTable()">
+              Download Excel >>
+              <span class="loading-icon" style="display: none;"><i class="fa fa-spinner fa-spin"></i></span>
+            </button>
+          </div>
+          <div class="col-md-2"></div>
+        </div>
+    
+        <div id="revenue-table" class="table-responsive">
+          <table id="data_table" class="table table-striped table-sm">
+            <thead>
+              <tr>
+                <th scope="col">Users<i class="fa fa-fw fa-sort"></i></th>
+                <th scope="col">Total Lines<i class="fa fa-fw fa-sort"></i></th>
+                <th scope="col">Paid Lines<i class="fa fa-fw fa-sort"></i></th>
+                <th scope="col">Error Count<i class="fa fa-fw fa-sort"></i></th>
+                <th scope="col">Accuracy (%)<i class="fa fa-fw fa-sort"></i></th>
+                <th scope="col">Revenue (VND)<i class="fa fa-fw fa-sort"></i></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+              <tr>
+                {% for cell in row %}
+                <td>{{ cell }}</td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr class="bold">
+                <td>Count</td>
+                {% for count in column_counts %}
+                <td>{{ count }}</td>
+                {% endfor %}
+              </tr>
+            </tfoot>
+          </table>
+          
+        </div>
+      </div>
+    </div>
+
+
+
+      <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js" integrity="sha384-uO3SXW5IuS1ZpFPKugNNWqTZRRglnUJK6UAZ/gxOX80nxEkN9NcGZTftn6RzhGWE" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" integrity="sha384-zNy6FEbO50N+Cg5wap8IKA4M/ZnLJgzc6w2NqACZaK0u0FXfOWRRJOnQtpZun8ha" crossorigin="anonymous"></script>
+      <!-- <script src="{{ url_for('static', filename='js/dashboard.js')}}"></script> -->
+
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script src="https://unpkg.com/exceljs/dist/exceljs.min.js"></script>
+
+      <script>
+        var headerCells = document.querySelectorAll('#data_table thead th');
+          headerCells.forEach(function (cell, index) {
+            cell.addEventListener('click', function () {
+              sortTable(index);
+            });
+          });
+
+          var sortOrders = Array(headerCells.length).fill(null);
+
+          function sortTable(columnIndex) {
+            var table = document.getElementById('data_table');
+            var rows = Array.from(table.querySelectorAll('tbody tr'));
+
+            if (sortOrders[columnIndex] === 'asc') {
+              rows.sort(function (a, b) {
+                var cellA = a.querySelector('td:nth-child(' + (columnIndex + 1) + ')');
+                var cellB = b.querySelector('td:nth-child(' + (columnIndex + 1) + ')');
+                var valueA = parseCellValue(cellA);
+                var valueB = parseCellValue(cellB);
+
+                if (valueA === valueB) {
+                  return 0;
+                } else if (valueA < valueB) {
+                  return -1;
+                } else {
+                  return 1;
+                }
+              });
+
+              sortOrders[columnIndex] = 'desc';
+            } else {
+              rows.sort(function (a, b) {
+                var cellA = a.querySelector('td:nth-child(' + (columnIndex + 1) + ')');
+                var cellB = b.querySelector('td:nth-child(' + (columnIndex + 1) + ')');
+                var valueA = parseCellValue(cellA);
+                var valueB = parseCellValue(cellB);
+
+                if (valueA === valueB) {
+                  return 0;
+                } else if (valueA < valueB) {
+                  return 1;
+                } else {
+                  return -1;
+                }
+              });
+
+              sortOrders[columnIndex] = 'asc';
+            }
+
+            var tbody = table.querySelector('tbody');
+
+            // Clear the table body
+            tbody.innerHTML = '';
+
+            // Append sorted rows to the table body
+            rows.forEach(function (row) {
+              tbody.appendChild(row);
+            });
+
+          }
+
+          function parseCellValue(cell) {
+            var value = cell.textContent.trim();
+            var numericValue = parseFloat(value.replace(/[^0-9.-]+/g, ''));
+
+            return isNaN(numericValue) ? value.toLowerCase() : numericValue;
+          }
+
+      </script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+
+
+<script>
+  // Get the revenue data and paidlines data passed from the server
+  var revenueData = JSON.parse(document.getElementById('revenue_data').textContent);
+  var paidlinesData = JSON.parse(document.getElementById('paidlines_data').textContent);
+  var errorcountData = JSON.parse(document.getElementById('error_count_data').textContent);
+  console.log(revenueData, paidlinesData, errorcountData);
+
+  // Update the chart with the fetched data
+  var ctx = document.getElementById('myChart').getContext('2d');
+  var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [
+        '25/12-21/01',
+        '22/01-21/02',
+        '22/02-21/03',
+        '22/03-21/04',
+        '22/04-21/05',
+        '22/05-21/06',
+        '22/06-21/07',
+        '22/07-21/08',
+        '22/08-21/09',
+        '22/09-23/10',
+        '24/10-23/11',
+        '24/11-22/12',
+      ],
+      datasets: [
+        {
+          data: revenueData,
+          lineTension: 0,
+          backgroundColor: 'transparent',
+          borderColor: '#007bff',
+          borderWidth: 3,
+          pointBackgroundColor: '#007bff',
+          label: 'Total Lines',
+        },
+        {
+          data: paidlinesData,
+          lineTension: 0,
+          backgroundColor: 'transparent',
+          borderColor: 'darkgreen',
+          borderWidth: 3,
+          pointBackgroundColor: 'darkgreen',
+          label: 'Paid Lines',
+        },
+        {
+          data: errorcountData,
+          lineTension: 0,
+          backgroundColor: 'transparent',
+          borderColor: '#ff7f50',
+          borderWidth: 3,
+          pointBackgroundColor: '#ff7f50',
+          label: 'Error Count',
+        },
+      ],
+    },
+    options: {
+      scales: {
+        yAxes: [
+          {
+            ticks: {
+              beginAtZero: false,
+            },
+          },
+        ],
+      },
+      legend: {
+        display: true,
+      },
+      plugins: {
+        datalabels: {
+          align: function(context) {
+            var dataset = context.dataset;
+            var datasetLabel = dataset.label;
+            if (datasetLabel === 'Error Count') {
+              align = 'top';
+            }
+            else{
+              align = 'left';
+            }
+            return align;
+          },
+          color: function(context) {
+            var dataset = context.dataset;
+            var datasetColor = dataset.borderColor;
+            // if (datasetColor === '#ff7f50') {
+            //   datasetColor = 'red';
+            // }
+            return datasetColor;
+          },
+          formatter: function(value, context) {
+            return context.dataset.data[context.dataIndex] > 0 ? value.toString() : '';
+          },
+          offset: 8,
+          padding: {
+            left: 8,
+            right: 8,
+            top: 4,
+            bottom: 4,
+          },
+          textAlign: 'center',
+          zIndex: 2,
+        },
+      },
+    },
+  });
+</script>
+
+
+
+
+
+
+      
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+  var selectedMonth = ""; // Default month value
+  var now = new Date();
+  var year = now.getFullYear();
+
+  var prevYearBtn = document.getElementById("prevYearBtn");
+  var nextYearBtn = document.getElementById("nextYearBtn");
+  var currentYearBtn = document.getElementById("currentYearBtn");
+  var monthPickerBody = document.querySelector(".monthPicker-body");
+  var revenueTable = document.getElementById("revenue-table");
+  var myChart = document.getElementById("myChart");
+
+  function loadingCells() {
+    var cells = revenueTable.querySelectorAll("tbody tr td:not(td:first-child),tfoot tr td:not(td:first-child)");
+    cells.forEach(function (cell) {
+      cell.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
+    });
+  }
+
+  prevYearBtn.addEventListener("click", function () {
+    if (year >= now.getFullYear()) {
+      year--;
+      currentYearBtn.textContent = "Year " + year;
+      loadingCells();
+      updateURL();
+    }
+  });
+
+  nextYearBtn.addEventListener("click", function () {
+    if (year < now.getFullYear() + 5) {
+      year++;
+      currentYearBtn.textContent = "Year " + year;
+      loadingCells();
+      updateURL();
+    }
+  });
+
+  monthPickerBody.addEventListener("click", function (event) {
+    loadingCells();
+    var link = event.target.closest("a");
+    if (!link) return;
+
+    var isActive = link.classList.contains("active");
+
+    // Remove active class from all links
+    var monthLinks = monthPickerBody.querySelectorAll("a");
+    monthLinks.forEach(function (link) {
+      link.classList.remove("active");
+    });
+
+    if (!isActive) {
+      // Add active class to the clicked link
+      link.classList.add("active");
+      selectedMonth = parseInt(link.dataset.month);
+      updateURL();
+    } else {
+      // Reset selected month and URL
+      selectedMonth = "";
+      updateURL();
+    }
+  });
+
+  function updateURL() {
+    var url = "/revenue";
+
+    // Create a new FormData object and append the selectedMonth and year values
+    var formData = new FormData();
+    formData.append("month", selectedMonth);
+    formData.append("year", year);
+
+    // Make an AJAX request to the server-side code
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        // Update the table with the fetched data
+        var data = JSON.parse(xhr.responseText);
+        renderTable(data.rows, data.column_counts);
+        // renderChart(data.rows);
+      }
+    };
+
+    xhr.send(formData);
+
+    // Update the URL without refreshing the page
+    history.pushState(null, null, url + `?month=${selectedMonth}&year=${year}`);
+  }
+
+  function renderTable(rows, columnCounts) {
+    var tbody = revenueTable.querySelector("tbody");
+    var tfoot = revenueTable.querySelector("tfoot");
+    tbody.innerHTML = ""; // Clear existing rows
+    tfoot.innerHTML = ""; // Clear existing rows
+
+    rows.forEach(function (row) {
+      var tr = document.createElement("tr");
+      row.forEach(function (cellText) {
+        var td = document.createElement("td");
+        td.textContent = cellText;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    // Create a new row for column counts in the table footer
+    var countRow = document.createElement("tr");
+    countRow.classList.add("bold");
+
+    // Add the first cell ("Count") to the count row
+    var countCell = document.createElement("td");
+    countCell.textContent = "Count";
+    countRow.appendChild(countCell);
+
+    // Add column count values as table cells starting from the second column
+    columnCounts.forEach(function (count) {
+      var td = document.createElement("td");
+      td.textContent = count;
+      countRow.appendChild(td);
+    });
+
+    // Append the count row to the table footer
+    tfoot.appendChild(countRow);
+  }
+
+  function renderChart(chartData) {
+    // TODO: Implement chart rendering logic using the chartData
+  }
+
+  var monthLinks = monthPickerBody.querySelectorAll("a");
+monthLinks.forEach(function (link) {
+  var month = parseInt(link.dataset.month);
+  var dateRange = link.textContent.trim().split("-");
+  var startDateParts = dateRange[0].trim().split("/");
+  var endDateParts = dateRange[1].trim().split("/");
+  var currentYear = new Date().getFullYear();
+var startDate = new Date(
+  currentYear,
+  parseInt(startDateParts[1]) - 1,
+  parseInt(startDateParts[0])
+);
+var endDate = new Date(
+  currentYear,
+  parseInt(endDateParts[1]) - 1,
+  parseInt(endDateParts[0])
+);
+  
+  if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && now >= startDate && now <= endDate) {
+    console.log(startDate,endDate)
+    link.classList.add("active");
+    selectedMonth = month;
+    loadingCells();
+    updateURL();
+  }
+});
+
+
+
+});
+</script>
+
+      
+      
+      
+
+
+
+      <script>
+        function exportToExcel_RevenueTable() {
+        $('.loading-icon').show();
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var month = urlParams.get('month');
+        var year = urlParams.get('year');
+        if (month) {
+            if (month === '1'){
+              month = '12.' + (now.getFullYear() - 1) + '-1.';
+            }
+            else{
+              month = parseInt(month) - 1 + '-' + month + '.';
+            }
+        }
+        else{
+          month = "";
+        }
+        if (!year){
+          year = now.getFullYear();
+        }
+
+        // Create a new Excel workbook
+        var wb = new ExcelJS.Workbook();
+        var ws = wb.addWorksheet('Revenue Report ' + month + year);
+
+        // Export table headers
+        var headerRow = ws.addRow();
+        var headerCells = document.querySelectorAll('#revenue-table table thead tr th');
+        headerCells.forEach(function (cell) {
+            var excelCell = headerRow.getCell(cell.cellIndex + 1);
+            excelCell.value = cell.textContent.trim();
+            excelCell.font = { bold: true }; // Set header font style to bold
+            excelCell.alignment = { vertical: 'middle', horizontal: 'center' }; // Set text alignment to middle and center
+        });
+
+        // Iterate through all rows of the table
+        var rows = document.querySelectorAll('#revenue-table table tbody tr');
+        rows.forEach(function (row, rowIndex) {
+            var excelRow = ws.addRow();
+            var cells = row.querySelectorAll('td');
+            cells.forEach(function (cell, cellIndex) {
+                var excelCell = excelRow.getCell(cellIndex + 1);
+                excelCell.value = cell.textContent.trim();
+
+                if (cellIndex == 4) {
+                    var value = cell.textContent.trim();
+                    if (!isNaN(value)) {
+                        value = Number(value);
+                        if (Number.isInteger(value)) {
+                            excelCell.numFmt = '0'; // Set cell format as a percentage without decimal places
+                            excelCell.value = value; // Convert the cell value to a percentage
+                        } else {
+                            excelCell.numFmt = '0.00'; // Set cell format as a percentage with two decimal places
+                            excelCell.value = value; // Convert the cell value to a percentage
+                        }
+                    }
+                } else if (cellIndex > 0 && cellIndex < 4 || cellIndex == 5) {
+                    var value = cell.textContent.trim();
+                    value = value.replace(/,/g, ''); // Remove all commas from the value
+                    if (!isNaN(value)) {
+                        excelCell.value = Number(value);
+                        excelCell.numFmt = '#,##0'; // Set cell format as a number with comma separators for thousands
+                    }
+                }
+
+                // Apply background color to the cells
+                if (rowIndex % 2 === 0) {
+                    if (cellIndex !== 1) {
+                        excelCell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'F2F2F2' } // Set the background color here (modify as needed)
+                        };
+                    }
+                }
+
+                excelCell.alignment = { vertical: 'middle', horizontal: 'center' }; // Set text alignment to middle and center
+                excelCell.font = { bold: false }; // Set font style to normal
+            });
+        });
+
+        // Export table footer
+        var tfootRow = ws.addRow();
+        var tfootCells = document.querySelectorAll('#revenue-table table tfoot tr td');
+        tfootCells.forEach(function (cell,cellIndex) {
+            var excelCell = tfootRow.getCell(cell.cellIndex + 1);
+            excelCell.value = cell.textContent.trim();
+            excelCell.font = { bold: true }; // Set footer font style to bold
+            excelCell.alignment = { vertical: 'middle', horizontal: 'center' }; // Set text alignment to middle and center
+
+            var value = cell.textContent.trim();
+            if (cellIndex == 4) {
+            var value = cell.textContent.trim();
+            if (!isNaN(value)) {
+                value = Number(value);
+                if (Number.isInteger(value)) {
+                    excelCell.numFmt = '0'; // Set cell format as a percentage without decimal places
+                    excelCell.value = value; // Convert the cell value to a percentage
+                } else {
+                    excelCell.numFmt = '0.00'; // Set cell format as a percentage with two decimal places
+                    excelCell.value = value; // Convert the cell value to a percentage
+                }
+            }
+        } else if (cellIndex > 0 && cellIndex < 4 || cellIndex == 5) {
+            var value = cell.textContent.trim();
+            value = value.replace(/,/g, ''); // Remove all commas from the value
+            if (!isNaN(value)) {
+                excelCell.value = Number(value);
+                excelCell.numFmt = '#,##0'; // Set cell format as a number with comma separators for thousands
+            }
+        }
+
+        });
+
+        // Auto-fit column widths
+        ws.columns.forEach(function (column) {
+            var maxCellLength = 0;
+            column.eachCell({ includeEmpty: true }, function (cell) {
+                var cellLength = cell.value ? cell.value.toString().length : 0;
+                if (cellLength > maxCellLength) {
+                    maxCellLength = cellLength;
+                }
+            });
+            column.width = maxCellLength < 12 ? 12 : maxCellLength;
+        });
+
+        // Save the workbook as an Excel file
+        wb.xlsx.writeBuffer().then(function (buffer) {
+            var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            
+            // Set the filename based on the month and year
+            var filename = 'Miravia_Revenue_Report_' + month + year + '.xlsx';
+
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            $('.loading-icon').hide();
+        });
+    }
+
+    </script>
+    
+
+
+
+  </body>
+  {% endblock %}

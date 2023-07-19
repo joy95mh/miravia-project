@@ -1,0 +1,38 @@
+#topnav {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #4a4c74;
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+ }
+ 
+ .nav-link {
+    display: inline-block;
+    height: 40px;
+    color: White;
+ 
+    text-align: center;
+    line-height: 40px;
+ 
+    text-decoration: none;
+ }
+ 
+ #logo {
+    width: 120px;
+ 
+    background-color: RoyalBlue;
+ 
+    font-weight: bold;
+ }
+ 
+ #about {
+    position: absolute;
+    top: 0;
+    right: 0;
+ }
+
+ .nav-link:focus, .nav-link:hover {
+   color: #f8b042;
+}

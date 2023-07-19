@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Miravia Database</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Material Design for Bootstrap</title>
+    <link rel="icon" href="{{ url_for('static', filename='miravia.png')}}" type="image/png">
+    <!-- MDB icon -->
+    <link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" />
+    <!-- Google Fonts Roboto -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+    <!-- MDB -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-address-form.min.css')}}" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/topnav.css')}}">
+    <link href="{{ url_for('static', filename='css/mobiscroll.jquery.min.css')}}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.3.2/css/fixedHeader.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.2.2/css/fixedColumns.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+
+
+  </head>
+  <style>
+    .dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropbtn {
+  background-color: transparent;
+  color: White;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  padding: 8px 0;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 4px 10px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  color: #f8b042;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown:hover .dropbtn {
+  color: #f8b042;
+}
+
+body {
+        background-color: aliceblue;
+        font-family: 'Google Sans', Roboto, Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+    }
+
+
+  </style>
+  
+  <body>
+    <nav id="topnav" style="z-index: 100;">
+      <div style="display: flex; justify-content: space-between;">
+        <div>
+          <a class="nav-link" style="font-weight: bold;" href="/">Home</a>
+          <a class="nav-link" style="font-weight: bold;" href="/database">Database QC</a>
+          <a class="nav-link" style="font-weight: bold;" href="/error-submit">Error Log QC</a>
+          <div class="dropdown">
+            <button class="dropbtn" style="font-weight: bold;">Report</button>
+            <div class="dropdown-content">
+              <a href="/report-file-imported">File Imported</a>
+              <a href="/report-user-records">User Records</a>
+            </div>
+          </div>
+          <a class="nav-link" style="font-weight: bold;" href="/revenue">Revenue Dashboard</a>
+        </div>
+      
+      
+      
+      <div>
+        <span type="text" id="_username" name="_username" style="font-style: italic; color: rgb(170 181 31);"></span>
+        <a class="nav-link" style="font-weight: bold;" href="/import-data">Import</a>
+        <a class="nav-link" style="font-weight: bold;" href="/access">Access</a>
+        <a id="logout" class="nav-link" style="font-weight: bold;" href="#" >Log out</a>
+      </div>
+    </div>
+    
+      
+   </nav>
+    {% block content %}{% endblock %}
+    
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.2.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
+    
+    <script>
+      $(document).ready(function() {
+        var _username = document.getElementById('_username');
+        var get_cookies = getCookie('username');
+        var atIndex = get_cookies.indexOf('@crunch.com.vn');
+
+        if (typeof get_cookies === 'undefined' || get_cookies === ''){
+          window.location.href = '/';
+        }
+    
+        if (atIndex !== -1) {
+          get_cookies = get_cookies.substring(0, atIndex);
+        }
+    
+        var role = getCookie('role');
+        console.log(role);
+    
+        if (role === 'user') {
+          // Hide the /access and /import-data links immediately
+          $('a[href="/access"], a[href="/import-data"]').hide();
+        }
+    
+        if (atIndex !== -1) {
+          document.cookie = 'username=';
+          document.cookie = 'role=';
+          // Redirect the user to the login page or any desired destination
+          window.location.href = '/'; // Replace '/login' with the actual logout or login page URL
+        } else {
+          _username.textContent = get_cookies;
+        }
+    
+        // Set the role cookie
+        document.cookie = 'role=' + role;
+      });
+    
+      function getCookie(cookieName) {
+        let cookie = {};
+        document.cookie.split(';').forEach(function(el) {
+          let [key, value] = el.split('=');
+          cookie[key.trim()] = value;
+        })
+        return cookie[cookieName];
+      }
+    </script>
+    
+      
+      <script>
+  
+        function getCookie(cookieName) {
+              let cookie = {};
+              document.cookie.split(';').forEach(function(el) {
+                  let [key,value] = el.split('=');
+                  cookie[key.trim()] = value;
+              })
+              return cookie[cookieName];
+              }
+      
+      </script>
+    <script>
+      
+      document.querySelector('#logout').addEventListener('click',logout);
+      function logout(event) {
+        
+        event.preventDefault();
+        // Delete the 'username' cookie by setting its expiration date to a past date
+        document.cookie = 'username=';
+        document.cookie = 'role=';
+        // Redirect the user to the login page or any desired destination
+        window.location.href = '/'; // Replace '/login' with the actual logout or login page URL
+      }
+    </script>
+
+
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

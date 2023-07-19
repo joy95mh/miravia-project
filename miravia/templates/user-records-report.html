@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .container {
+        max-width: max-content;
+        width: 600px;
+        overflow-x: auto;
+        margin-top: 50px;
+    }
+
+    .table-container {
+        table-layout: fixed;
+    }
+
+    .table-container th,
+    .table-container td {
+        background-color: #ffffff;
+        width: 90px;
+        white-space: nowrap;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .table-container {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .headers {
+        font-weight: bold;
+    }
+
+    .loading-icon {
+        display: none;
+        margin-left: 10px;
+    }
+
+    .table-container th {
+        position: sticky;
+        top: 0;
+        background-color: #bbd6da;
+    }
+
+    .table-wrapper {
+        position: relative;
+        overflow: auto;
+        height: 610px; /* Set the desired height of the table */
+    }
+
+    .table-wrapper thead th:first-child,
+    .table-wrapper tbody td:first-child,
+    .table-wrapper tfoot td:first-child {
+        left: 0;
+        background-color: #fff;
+        z-index: 2;
+    }
+
+    tfoot > tr > td {
+        background-color: #bbd6da !important;
+    }
+
+    .table-wrapper tbody tr>td:first-child,
+    .table-wrapper tfoot tr td {
+        position: sticky;
+        bottom: 0;
+        background-color: #fff;
+        z-index: 1;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    td:nth-child(1) {
+        text-align: left !important;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+        width: 160px !important; /* Set the desired width for the "Days" column */
+    }
+
+    .nav-tabs .nav-link {
+        margin-top: 70px;
+        background-color: #d5d9de;
+        margin-bottom: 10px;
+    }
+
+    .nav-link.active {
+        background-color: #aee885;
+    }
+
+    .table-wrapper,
+    #import-report-table {
+        font-size: 0rem;
+        line-height: 0.5;
+    }
+
+    .highlight td {
+        background-color: #e4caa2 !important;
+        font-weight: normal;
+    }
+
+
+    .tile_stats_count {
+        border-left: 3px solid #D9DEE4;
+        /* border-bottom: 1px solid #D9DEE4; */
+        padding: 0 10px 0 20px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        position: relative;
+    }
+
+    .row .tile_stats_count:nth-child(4){
+        border-left: 5px solid #d2d4d7;
+    }
+
+    .tile_stats_count span {
+        font-size: 15px;
+    }
+
+    .tile_stats_count .count {
+        font-size: 40px;
+        line-height: 47px;
+        font-weight: 600;
+    }
+
+    .green {
+        color: green;
+    }
+
+    .red {
+        color: red;
+    }
+
+    .count_top {
+        font-weight: bold;
+        color: #73879C;
+    }
+
+    .count_bottom{
+        font-style: italic;
+    }
+
+
+</style>
+
+
+<body>
+    <div class="row" style="margin-top: 60px;">
+        <div class="col-md-2 tile_stats_count">
+        <span class="count_top">Paid Lines - Total</span>
+        <div class="count" id="total_paid_lines">{{total_paid_lines}}</div>
+        <span class="count_bottom"><i class="red" id="percentage_value_total"><i class="fa fa-sort-asc"></i></i> Of All Lines - Total</span>
+        </div>
+        <div class="col-md-2 tile_stats_count">
+        <span class="count_top">Paid Lines - Current month</span>
+        <div class="count" id="paid_lines_this_month" >{{paid_lines_this_month}}</div>
+        <span class="count_bottom"><i class="red" id="percentage_value_this_month"><i class="fa fa-sort-asc"></i></i> Of All Lines - Current month</span>
+        </div>
+        <div class="col-md-2 tile_stats_count">
+        <span class="count_top">Your Paid Lines - Current month</span>
+        <div class="count green" id="your_paid_lines_count">-</div>
+        <input type="hidden" id="your_paid_lines_data" value="{{ your_paid_lines_json }}">
+        <span class="count_bottom"><i class="red" id="percentage_value_your_this_month"><i class="fa fa-sort-asc"></i></i> Of Your All Lines - Current month</span>
+        </div>
+        <div class="col-md-2 tile_stats_count">
+        <span class="count_top">All Lines - Total</span>
+        <div class="count" id="total_all_lines">{{total_all_lines}}</div>
+        <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>-</i></span>
+        </div>
+        <div class="col-md-2 tile_stats_count">
+        <span class="count_top">All Lines - Current month</span>
+        <div class="count" id="all_lines_this_month">{{all_lines_this_month}}</div>
+        <span class="count_bottom"><i class="red"><i class="fa fa-sort-asc"></i>-</i></span>
+        </div>
+        <div class="col-md-2 tile_stats_count">
+        <span class="count_top">Your All Lines - Current month</span>
+        <div class="count green" id="your_all_lines_count">-</div>
+        <input type="hidden" id="your_all_lines_data" value="{{ your_all_lines_json }}">
+        <span class="count_bottom"><i class="red"><i class="fa fa-sort-asc"></i>-</i></span>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-md-6">
+            <div id="table_no_cash">
+                <div class="row">
+                    <h2 class="col-md-4" style="margin-top: 10px;">Paid Lines</h2>
+                    <button type="button" style="margin-bottom: 5px; float: right;" class="col-md-4 btn btn-primary mt-2" onclick="exportToExcel_only_charged()">Download Excel >><span class="loading-icon"><i class="fa fa-spinner fa-spin"></i></span></button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table table-striped table-bordered table-container">
+                        <thead>
+                            <tr class="bold">
+                                <th style="width: 100px;">Users</th>
+                                {% for day_total in day_totals %}
+                                    <th>{{ day_total.day }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user }}</td>
+                                    {% for day_total in day_totals %}
+                                        <td>{{ user|get_count_in_day(day_total.day, pic_in_day) }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                            <tfoot>
+                                <tr class="bold">
+                                    <td>Total in day</td>
+                                    {% for day_total in day_totals %}
+                                        <td>{{ day_total|get_total_count(pic_in_day) }}</td>
+                                    {% endfor %}
+                                </tr>
+                            </tfoot>                        
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="col-md-6">
+            <div id="table_all_records">
+                <div class="row">
+                    <h2 class="col-md-4" style="margin-top: 10px;">All Lines</h2>
+                    <button type="button" style="margin-bottom: 5px; float: right;" class="col-md-4 btn btn-primary mt-2" onclick="exportToExcel_allLines()">Download Excel >><span class="loading-icon"><i class="fa fa-spinner fa-spin"></i></span></button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table table-striped table-bordered table-container">
+                        <thead>
+                            <tr class="bold">
+                                <th style="width: 100px;">Users</th>
+                                {% for day_total in day_totals1 %}
+                                    <th>{{ day_total.day }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users1 %}
+                                <tr>
+                                    <td>{{ user }}</td>
+                                    {% for day_total in day_totals1 %}
+                                        <td>{{ user|get_count_in_day1(day_total.day, pic_in_day1) }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                            <tfoot>
+                                <tr class="bold">
+                                    <td>Total in day</td>
+                                    {% for day_total in day_totals1 %}
+                                        <td>{{ day_total|get_total_count1(pic_in_day1) }}</td>
+                                    {% endfor %}
+                                </tr>
+                            </tfoot>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+
+
+    
+
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/exceljs/dist/exceljs.min.js"></script>
+
+
+<script>
+    function exportToExcel_allLines() {
+  $('.loading-icon').show();
+
+  // Create a new Excel workbook
+  var wb = new ExcelJS.Workbook();
+  var ws = wb.addWorksheet('Report');
+
+  // Export table headers
+  var headerRow = ws.addRow();
+  var headerCells = document.querySelectorAll('#table_all_records table thead tr th');
+  headerCells.forEach(function (cell) {
+    var excelCell = headerRow.getCell(cell.cellIndex + 1);
+    excelCell.value = cell.textContent.trim();
+    excelCell.font = { bold: true }; // Set header font style to bold
+    excelCell.alignment = { vertical: 'middle', horizontal: 'center' }; // Set text alignment to middle and center
+  });
+
+  // Freeze table headers
+  ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+  // Iterate through all rows of the table
+  var rows = document.querySelectorAll('#table_all_records table tbody tr');
+  rows.forEach(function (row, rowIndex) {
+    var excelRow = ws.addRow();
+    var cells = row.querySelectorAll('td');
+    cells.forEach(function (cell, cellIndex) {
+      var excelCell = excelRow.getCell(cellIndex + 1);
+      excelCell.value = cell.textContent.trim();
+
+      // Apply specific cell style for the row ID number
+      if (cellIndex === 0) {
+        excelCell.font = { bold: true }; // Apply bold font style to the ID number cell
+        excelCell.value = cell.textContent.trim(); // Assign the cell value as a string
+      } else {
+        excelCell.numFmt = '0'; // Set cell format as a number
+        excelCell.value = Number(cell.textContent.trim()); // Convert the cell value to a number
+      }
+
+      // Apply background color to the cells
+      if (rowIndex % 2 === 0) {
+        excelCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'F2F2F2' } // Set the background color here (modify as needed)
+            };
+        
+      }
+
+      excelCell.alignment = { vertical: 'middle', horizontal: 'center' }; // Set text alignment to middle and center
+    });
+  });
+
+  // Add the last row (Total of all)
+    var totalRow = ws.addRow();
+    var totalCells = document.querySelectorAll('#table_all_records table tfoot tr td');
+
+    totalCells.forEach(function (cell, cellIndex) {
+    var excelCell = totalRow.getCell(cellIndex + 1);
+    excelCell.value = cell.textContent.trim();
+    excelCell.font = { bold: true }; // Apply bold font style to the total row
+    excelCell.alignment = { vertical: 'middle', horizontal: 'center' }; // Set text alignment to middle and center
+    if (cellIndex !== 0) {
+        excelCell.numFmt = '0'; // Set cell format as a number
+        excelCell.value = Number(cell.textContent.trim());
+    }
+    
+    if (cellIndex !== 0) {
+        excelCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'D4EFF8' } // Set the background color to light blue (modify as needed)
+        };
+    }
+    });
+
+
+  // Auto-fit column widths
+  ws.columns.forEach(function (column) {
+    var maxCellLength = 0;
+    column.eachCell({ includeEmpty: true }, function (cell) {
+      var cellLength = cell.value ? cell.value.toString().length : 0;
+      if (cellLength > maxCellLength) {
+        maxCellLength = cellLength;
+      }
+    });
+    column.width = maxCellLength < 12 ? 12 : maxCellLength;
+  });
+
+  // Save the workbook as an Excel file
+  wb.xlsx.writeBuffer().then(function (buffer) {
+    var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = 'Miravia_All Lines_report.xlsx';
+    link.click();
+    $('.loading-icon').hide();
+  });
+}
+
+    
+  </script>
+  
+  <script>
+    function exportToExcel_only_charged() {
+  $('.loading-icon').show();
+
+  // Create a new Excel workbook
+  var wb = new ExcelJS.Workbook();
+  var ws = wb.addWorksheet('Report');
+
+  // Export table headers
+  var headerRow = ws.addRow();
+  var headerCells = document.querySelectorAll('#table_no_cash table thead tr th');
+  headerCells.forEach(function (cell) {
+    var excelCell = headerRow.getCell(cell.cellIndex + 1);
+    excelCell.value = cell.textContent.trim();
+    excelCell.font = { bold: true }; // Set header font style to bold
+    excelCell.alignment = { vertical: 'middle', horizontal: 'center' }; // Set text alignment to middle and center
+  });
+
+  // Freeze table headers
+  ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+  // Iterate through all rows of the table
+  var rows = document.querySelectorAll('#table_no_cash table tbody tr');
+  rows.forEach(function (row, rowIndex) {
+    var excelRow = ws.addRow();
+    var cells = row.querySelectorAll('td');
+    cells.forEach(function (cell, cellIndex) {
+      var excelCell = excelRow.getCell(cellIndex + 1);
+      excelCell.value = cell.textContent.trim();
+
+      // Apply specific cell style for the row ID number
+      if (cellIndex === 0) {
+        excelCell.font = { bold: true }; // Apply bold font style to the ID number cell
+        excelCell.value = cell.textContent.trim(); // Assign the cell value as a string
+      } else {
+        excelCell.numFmt = '0'; // Set cell format as a number
+        excelCell.value = Number(cell.textContent.trim()); // Convert the cell value to a number
+      }
+
+      // Apply background color to the cells
+      if (rowIndex % 2 === 0) {
+        excelCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'F2F2F2' } // Set the background color here (modify as needed)
+            };
+        
+      }
+
+      excelCell.alignment = { vertical: 'middle', horizontal: 'center' }; // Set text alignment to middle and center
+    });
+  });
+
+  // Add the last row (Total of all)
+    var totalRow = ws.addRow();
+    var totalCells = document.querySelectorAll('#table_no_cash table tfoot tr td');
+
+    totalCells.forEach(function (cell, cellIndex) {
+    var excelCell = totalRow.getCell(cellIndex + 1);
+    excelCell.value = cell.textContent.trim();
+    excelCell.font = { bold: true }; // Apply bold font style to the total row
+    excelCell.alignment = { vertical: 'middle', horizontal: 'center' }; // Set text alignment to middle and center
+    if (cellIndex !== 0) {
+        excelCell.numFmt = '0'; // Set cell format as a number
+        excelCell.value = Number(cell.textContent.trim());
+    }
+    
+    if (cellIndex !== 0) {
+        excelCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'D4EFF8' } // Set the background color to light blue (modify as needed)
+        };
+    }
+    });
+
+
+  // Auto-fit column widths
+  ws.columns.forEach(function (column) {
+    var maxCellLength = 0;
+    column.eachCell({ includeEmpty: true }, function (cell) {
+      var cellLength = cell.value ? cell.value.toString().length : 0;
+      if (cellLength > maxCellLength) {
+        maxCellLength = cellLength;
+      }
+    });
+    column.width = maxCellLength < 12 ? 12 : maxCellLength;
+  });
+
+  // Save the workbook as an Excel file
+  wb.xlsx.writeBuffer().then(function (buffer) {
+    var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = 'Miravia_Only Charged Lines_report.xlsx';
+    link.click();
+    $('.loading-icon').hide();
+  });
+}
+
+    
+  </script> 
+
+
+<script>
+    $(document).ready(function() {
+        var _username = getCookie('username');
+        var your_paid_lines_data = JSON.parse(document.getElementById('your_paid_lines_data').value);
+        var your_all_lines_data = JSON.parse(document.getElementById('your_all_lines_data').value);
+
+        var your_paid_lines = your_paid_lines_data[_username];
+        var your_all_lines = your_all_lines_data[_username];
+        document.getElementById('your_paid_lines_count').textContent = your_paid_lines;
+        document.getElementById('your_all_lines_count').textContent = your_all_lines;
+
+        //Your paid lines this month
+        var percentage_your_this_month = Math.round((your_paid_lines / your_all_lines) * 100);
+
+        document.getElementById('percentage_value_your_this_month').textContent = percentage_your_this_month + "%";
+
+        //All Lines Total
+        total_paid_lines = document.getElementById('total_paid_lines').textContent
+        total_all_lines = document.getElementById('total_all_lines').textContent
+
+        var percentage_total = Math.round((total_paid_lines / total_all_lines) * 100);
+
+        document.getElementById('percentage_value_total').textContent = percentage_total + "%";
+
+        //Paid lines This month
+        paid_lines_this_month = document.getElementById('paid_lines_this_month').textContent
+        all_lines_this_month = document.getElementById('all_lines_this_month').textContent
+
+        var percentage_this_month = Math.round((paid_lines_this_month / all_lines_this_month) * 100);
+
+        document.getElementById('percentage_value_this_month').textContent = percentage_this_month + "%";
+
+        // Find the table rows and iterate over them
+        $('table tbody tr').each(function() {
+            var rowUser = $(this).find('td:first-child').text().trim();
+            // Check if the row user matches the _username
+            if (rowUser === _username) {
+                $(this).addClass('highlight');
+            }
+        });
+    });
+
+
+    function getCookie(cookieName) {
+        let cookie = {};
+        document.cookie.split(';').forEach(function(el) {
+            let [key,value] = el.split('=');
+            cookie[key.trim()] = value;
+        })
+        return cookie[cookieName];
+        }
+</script>
+
+  
+
+{% endblock %}
+

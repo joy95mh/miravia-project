@@ -1,0 +1,326 @@
+
+<style>
+  .modal-dialog {
+    max-width: 1000px;
+  }
+  .form-outline .form-control{
+    border: 1px solid #ced4da;
+  }
+
+</style>
+<div class="modal" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- Modal header -->
+        <div class="modal-header">
+          <h5 class="modal-title">Update</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+  
+        <!-- Modal body -->
+        <div class="modal-body">
+          <style>
+            /* CSS styles for the message text */
+            #message-text {
+                padding: 10px;
+                border-radius: 5px;
+                font-weight: bold;
+                margin-top: 10px;
+            }
+            
+            #message-text.success {
+                color: green;
+                background-color: #d4edda;
+                border-color: #c3e6cb;
+            }
+            
+            #message-text.error {
+                color: red;
+                background-color: #f8d7da;
+                border-color: #f5c6cb;
+            }
+            
+            label[for="productServiceSelect"] {
+                display: block;
+                margin-bottom: 5px;
+                font-size: x-small;
+                color: #0d6efd;
+                font-weight:bold;
+            }
+            .form-outline {
+                font-size: small;
+                font-display:inherit;
+                
+            }
+            .form-outline .form-control~.form-label {
+                color: #1266f1;
+                font-weight:bold;
+            }
+    
+            #input-form.disabled input:not(#lead-number):not(#url), 
+            #input-form.disabled select:not(#local_spanish_seller):not(#feedback-final):not(#qualification-feedback):not(#pic){
+                    pointer-events: none;
+                    background-color: #e9ecef;
+            }
+    
+            #input-form.disabled1 input:not(#lead-number):not(#url):not(#vat), 
+            #input-form.disabled1 select:not(#cluster):not(#product-service):not(#local_spanish_seller):not(#feedback-final):not(#qualification-feedback):not(#pic){
+                    pointer-events: none;
+                    background-color: #e9ecef;
+            }
+    
+            #input-form .pointer_none {
+                    pointer-events: none;
+                    background-color: #e9ecef;
+            }
+    
+    
+    
+        </style>
+      
+      <!-- Start your project here-->
+      <form id="input-form" method="POST" action="/">
+      <div class="row" style="display: flex; justify-content: center; margin-top: 60px;">
+        <div class="col-md-7 mb-2">
+            <div class="row g-2">
+                <div class="col">
+                  <div class="card">
+                    <div >
+                      <select id="pic" name="pic" class="form-select" style="height: 41px; font-weight: bold;">
+                            <option value="Tín (ductin.nguyen@crunch.com.vn)">Tín (ductin.nguyen@crunch.com.vn)</option>
+                        </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="card">
+                    <button id="load-domain" type="button" style="height:40px; font-size: 0.9rem; font-weight: bold;" class="btn btn-primary btn-block">
+                        Refresh Domain ?
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <div class="col-md-12 mb-4" style="display: flex; justify-content: center;">
+          <div class="card" style="width: 1010px;">
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col">
+                        <label for="productServiceSelect">-</label>
+                        <div class="form-outline mb-4">
+                            <input type="text" id="lead-number" class="form-control" name="lead-number" />
+                            <label class="form-label" for="form7Example3">LEAD NUMBER</label>
+                        </div>
+    
+                        <!-- Text input -->
+                        <div class="form-outline mb-4">
+                            <input type="text" id="url" class="form-control pointer_none" name="url"/>
+                            <label class="form-label" for="form7Example3">LINK/URL</label>
+                        </div>
+                        <label for="productServiceSelect" >PRODUCT/SERVICE</label>
+                        <select name="product-service" id="product-service" class="form-select reset" style="margin-bottom: 23px;height: 36px;">
+                            
+                            <option value="" selected disabled>---Please select---</option>
+                            <option value="Only Services">Only Services</option>
+                            <option value="Only Products">Only Products</option>
+                            <option value="Products & Services">Products & Services</option>
+                            <option value="N/A">N/A</option>
+                        </select>
+                        <label for="productServiceSelect" >LOCAL SPANISH SELLER?</label>
+                        <select name="local_spanish_seller" id="local_spanish_seller" class="form-select reset" style="margin-bottom: 23px;height: 36px;">
+                            <option value="" selected disabled>---Please select---</option>
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+               
+                        </select>
+                        
+                        <div class="form-outline mb-4">
+                            <input type="text" id="vat" name="vat" class="form-control reset" />
+                            <label class="form-label" for="vat">VAT</label>
+                        </div>
+                        <label for="productServiceSelect" >CLUSTER</label>
+                        <select name="cluster" id="cluster" class="form-select reset" style="margin-bottom: 23px;height: 36px;">
+                            <option value="" selected disabled>---Please select---</option>
+                            <option value="B&H">B&H</option>
+                            <option value="EL">EL</option>
+                            <option value="FA">FA</option>
+                            <option value="GCMB">GCMB</option>
+                            <option value="GM">GM</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <label for="productServiceSelect" >L1</label>
+                        <select name="l1" id="l1" class="form-select reset" style="margin-bottom: 23px;height: 36px;">
+                          <option value="" selected disabled>---Please select---</option>
+                          {% for category in categories_l1 %}
+                          <option value="{{ category }}">{{ category }}</option>
+                          {% endfor %}
+                          
+                      </select>
+                      <label for="productServiceSelect" >L2</label>
+                      <select name="l2" id="l2" class="form-select reset" style="margin-bottom: 23px;height: 36px;">
+                          <option value="" selected disabled>---Please select---</option>
+                          {% for category in categories_l2 %}
+                          <option value="{{ category }}">{{ category }}</option>
+                          {% endfor %}
+                      </select>
+    
+                        <!-- Text input -->
+                        <div class="form-outline mb-4">
+                        <input type="text" id="company-name" name="company-name" class="form-control reset" />
+                        <label class="form-label" for="company-name">COMPANY NAME</label>
+                        </div>
+                        <label for="productServiceSelect" >REVENUE</label>
+                        <select name="revenue" id="revenue" class="form-select reset" style="margin-bottom: 23px;height: 36px;">
+                            <option value="" selected disabled>---Please select---</option>
+                            <option value="1 - 250.000">1 - 250.000</option>
+                            <option value="250.000 - 750.000">250.000 - 750.000</option>
+                            <option value="750.000 - 1.500.000">750.000 - 1.500.000</option>
+                            <option value="1.500.000 - 3.000.000">1.500.000 - 3.000.000</option>
+                            <option value="3.500.000 - 50.000.000">3.500.000 - 50.000.000</option>
+                            <option value="More than 50.000.000">More than 50.000.000</option>
+                        </select>
+                        <label for="productServiceSelect" >PRODUCT COUNT</label>
+                        <select name="product-count" id="product-count" class="form-select reset" style="margin-bottom: 23px;height: 36px;">
+                            <option value="" selected disabled>---Please select---</option>
+                            <option value="0 - 10">0 - 10</option>
+                            <option value="11 - 1000">11 - 1000</option>
+                            <option value="1.000+">1.000+</option>
+                            <option value="10.000+">10.000+</option>
+                            <option value="50.000+">50.000+</option>
+                            <option value="100.000+">100.000+</option>
+                        </select>
+            
+                        
+                    </div>
+                    <div class="col">
+                        <label for="productServiceSelect" >PRODUCT DESCRIPTION OR AT LEAST 2 PRODUCT IMAGES</label>
+                        <select name="product_desc_or_at_least_2_product_images" id="product_desc_or_at_least_2_product_images" class="form-select reset" style="margin-bottom: 23px;height: 36px;">
+                            <option value="" selected disabled>PRODUCT DESCRIPTION OR AT LEAST 2 PRODUCT IMAGES?</option>
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+               
+                        </select>
+    
+                        <div class="form-outline mb-4">
+                            <input type="text" name="amount-of-phonenumbers" id="amount-of-phonenumbers" class="form-control" />
+                            <label class="form-label" for="amount-of-phonenumbers">AMOUNT OF PHONE NUMBERS?</label>
+                        </div>
+    
+                        <!-- Text input -->
+                        <div class="form-outline mb-4">
+                        <input type="text" name="telephone" id="telephone" class="form-control reset" />
+                        <label class="form-label" for="telephone">TELEPHONE</label>
+                        </div>
+            
+                        <!-- Text input -->
+                        <div class="form-outline mb-4">
+                        <input type="text" name="telephone1" id="telephone1" class="form-control reset" />
+                        <label class="form-label" for="telephone1">TELEPHONE1</label>
+                        </div>
+            
+                        <!-- Email input -->
+                        <div class="form-outline mb-4">
+                        <input type="text" name="amount-of-emails" id="amount-of-emails" class="form-control" />
+                        <label class="form-label" for="amount-of-emails">AMOUNT OF EMAILS</label>
+                        </div>
+            
+                        <!-- Number input -->
+                        <div class="form-outline mb-4">
+                        <input type="text" name="email" id="email" class="form-control reset" />
+                        <label class="form-label" for="email">EMAIL</label>
+                        </div>
+                        <!-- Text input -->
+                        <div class="form-outline mb-4">
+                            <input type="text" name="email1" id="email1" class="form-control reset" />
+                            <label class="form-label" for="email1">EMAIL1</label>
+                        </div>
+                        <label for="productServiceSelect" >FEEDBACK FINAL</label>
+                        <select name="feedback-final" id="feedback-final" class="form-select reset" style="margin-bottom: 23px; height: 36px;">
+                            <option value="" selected disabled>---Please select---</option>
+                            <option value="OK">OK</option>
+                            <option value="NOT OK">NOT OK</option>
+                            <option value="UNCERTAIN">UNCERTAIN</option>
+                            <option value="MAINTENANCE WEBSITE">MAINTENANCE WEBSITE</option>
+                          </select>
+                        <label for="productServiceSelect" >QUALIFICATION FEEDBACK</label>
+                        <select name="qualification-feedback" id="qualification-feedback" class="form-select reset" style="margin-bottom: 23px; height: 36px;">
+                            <option value="" selected disabled>---Please select---</option>
+                            <option value="UNCERTAIN - small catalogue less than 10 items">UNCERTAIN - small catalogue less than 10 items</option>
+                            <option value="CATALOGUE - Images Background">CATALOGUE - Images Background</option>
+                            <option value="INACTIVE PAGE - Personal website">INACTIVE PAGE - Personal website</option>
+                            <option value="INACTIVE PAGE - Amazon">INACTIVE PAGE - Amazon</option>
+                            <option value="INACTIVE PAGE - Maintenance">INACTIVE PAGE - Maintenance</option>
+                            <option value="INACTIVE PAGE - Register to view pages">INACTIVE PAGE - Register to view pages</option>
+                            <option value="WRONG CATEGORY - Personalised & Services">WRONG CATEGORY - Personalised & Services</option>
+                            <option value="WRONG CATEGORY - Books">WRONG CATEGORY - Books</option>
+                            <option value="WRONG CATEGORY - Sex">WRONG CATEGORY - Sex</option>
+                            <option value="WRONG CATEGORY - CD & DVD">WRONG CATEGORY - CD & DVD</option>
+                            <option value="WRONG CATEGORY - CBD Derivative">WRONG CATEGORY - CBD Derivative</option>
+                            <option value="WRONG CATEGORY - Frozen Products">WRONG CATEGORY - Frozen Products</option>
+                            <option value="WRONG CATEGORY - Spare Parts">WRONG CATEGORY - Spare Parts</option>
+                            <option value="WRONG CATEGORY - Prom & Wedding">WRONG CATEGORY - Prom & Wedding</option>
+                            <option value="WRONG CATEGORY - Smoking Gadgets">WRONG CATEGORY - Smoking Gadgets</option>
+                            <option value="WRONG CATEGORY - Musical Instruments">WRONG CATEGORY - Musical Instruments</option>
+                            <option value="WRONG CATEGORY - Hunting tools">WRONG CATEGORY - Hunting tools</option>
+                            <option value="WRONG CATEGORY - Tools">WRONG CATEGORY - Tools</option>
+                            <option value="WRONG CATEGORY - Software">WRONG CATEGORY - Software</option>
+                            <option value="WRONG CATEGORY - Industrial Tools">WRONG CATEGORY - Industrial Tools</option>
+                            <option value="WRONG CATEGORY - Cake Shop">WRONG CATEGORY - Cake Shop</option>
+                            <option value="NOT APPROPRIATE - Explicit/Violent content">NOT APPROPRIATE - Explicit/Violent content</option>
+                            <option value="NOT APPROPRIATE - Possible Fakes/Fraud">NOT APPROPRIATE - Possible Fakes/Fraud</option>
+                            <option value="NOT EU - Language and currency not EU">NOT EU - Language and currency not EU</option>
+                            <option value="N/A">N/A</option>
+                          </select>
+                        <div class="card" style="border: none;">
+                            <button type="submit" id="save-button" style="height:40px; font-size: 0.9rem; font-weight: bold;" class="btn btn-primary btn-block">
+                              Update
+                            </button>
+                          </div>
+                    </div>
+                    
+            </div>
+              
+            </div>
+          </div>
+        </div>
+      
+        
+      </div>
+    </form>
+      
+      
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- End your project here-->
+    
+      <!-- MDB -->
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js')}}"></script>
+      <script src="{{ url_for('static', filename='js/save-load-button.js') }}"></script>
+
+      <script>
+    
+        $(document).ready(function () {
+          var select = document.getElementById("pic");
+            $('#pic option').remove();
+            var option = document.createElement("option");
+            option.text = getCookie('username');
+            option.value = getCookie('username');
+            select.appendChild(option)
+          
+            function getCookie(cookieName) {
+                let cookie = {};
+                document.cookie.split(';').forEach(function(el) {
+                    let [key,value] = el.split('=');
+                    cookie[key.trim()] = value;
+                })
+                return cookie[cookieName];
+                }
+        })
+      
+    
+      </script>

@@ -1,0 +1,1878 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<style>
+  /* table */
+  #data {
+    width: auto;
+    white-space: nowrap;
+  }
+  
+  .url-column {
+    width: 200px;
+  }
+
+  .container {
+    max-width: 2000px; /* Set your desired max-width here */
+    overflow-x: auto;
+  }
+
+  .dataTables_filter {
+    width: 100%;
+    float: left;
+  }
+
+  .dataTables_filter label {
+    float: left;
+    width: 100%;
+  }
+
+  div.dataTables_wrapper div.dataTables_filter input {
+    width: 325px;
+  }
+
+  td.highlight {
+    background-color: rgb(230, 232, 232) !important;
+  }
+
+  input.form-control.form-control-md {
+    background-color: white;
+  }
+
+  #data_length {
+    width: 100%;
+  }
+
+  #data_length label select {
+    background-color: white;
+  }
+
+  .hide-button {
+    display: none;
+  }
+
+  .table>:not(caption)>*>* {
+    border-bottom-width: 0px !important;
+  }
+
+  .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    color: white !important;
+    border: 0px solid #111;
+    background-color: none;
+    background: none;
+    background: none;
+    background: none;
+    background: none;
+    background: none;
+    background: none;
+  }
+
+  .dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0px;
+  }
+
+  /* modal */
+  .modal-dialog {
+    max-width: 1000px;
+  }
+
+  .form-outline .form-control {
+    border: 0;
+  }
+
+  .form-outline.copy {
+    position: relative;
+  }
+
+  .form-outline.copy .copy-url {
+    position: absolute;
+    right: 2px;
+    top: 1px;
+    cursor: pointer;
+    padding: 4px 14px;
+    background-color: #f98825;
+    font-size: 16px;
+    border-radius: 4px;
+  }
+
+  #input-form.disabled_product_service_only_service input,
+  #input-form.disabled_product_service_only_service select:not(#product-service) {
+    pointer-events: none;
+    background-color: #e9ecef;
+  }
+
+  #input-form.disabled_product_service_na input,
+  #input-form.disabled_product_service_na select:not(#product-service):not(#qualification-feedback) {
+    pointer-events: none;
+    background-color: #e9ecef;
+  }
+
+  #input-form.disabled_product_service input:not(#lead-number):not(#url),
+  #input-form.disabled_product_service select:not(#product-service):not(#qualification-feedback):not(#pic) {
+    pointer-events: none;
+    background-color: #e9ecef;
+  }
+
+  #input-form.disabled_spanish input:not(#lead-number):not(#url),
+  #input-form.disabled_spanish select:not(#product-service):not(#local_spanish_seller):not(#qualification-feedback):not(#pic) {
+    pointer-events: none;
+    background-color: #e9ecef;
+  }
+
+  #input-form.disabled input:not(#lead-number):not(#url),
+  #input-form.disabled select:not(#local_spanish_seller):not(#qualification-feedback):not(#pic) {
+    pointer-events: none;
+    background-color: #e9ecef;
+  }
+
+  #input-form.disabled1 input:not(#lead-number):not(#url):not(#vat),
+  #input-form.disabled1 select:not(#cluster):not(#product-service):not(#local_spanish_seller):not(#feedback-final):not(#qualification-feedback):not(#pic) {
+    pointer-events: none;
+    background-color: #e9ecef;
+  }
+
+  #input-form .pointer_none {
+    pointer-events: none;
+    background-color: #e9ecef;
+  }
+
+  .toggle-vis {
+    text-decoration: none;
+    color: blue;
+  }
+
+  #toggle-all {
+    text-decoration: none;
+    color: blue;
+    font-weight: 500;
+  }
+
+  td {
+    max-width: 200px;
+    word-wrap:normal;
+    white-space:nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  #data_length {
+      width:40%;
+  }
+
+  .dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #aaa;
+  }
+
+  input-group {
+    border: 1px solid #aaa;
+    border-radius: 0.25rem;
+  }
+
+  #data {
+    background-color: #f4f8ff ;
+  }
+
+  .dataTables_scroll {
+    
+    line-height: 0.5;
+  }
+
+  table.dataTable tbody th, table.dataTable tbody td {
+    padding: 5px 7px;
+}
+  select, input, .container, table thead, table tr {
+    font-size: .8rem !important;
+  }
+</style>
+
+
+
+<div style="margin-top: 70px;" class="container">
+  <!-- <button id="moveDataButton">GoogleSheet</button> -->
+  <!-- <h1>{{ title }}</h1> -->
+  <div class="row">
+    <div class="col-md-5 mb-2">
+      <div class="input-group">
+        <input id="datePicker" type="date" name="datePicker" class="form-control form-control-md" placeholder="Select Date">
+        <select id="starthourPicker" class="form-control form-control-md">
+          <option value="">from time</option>
+          {% for hour in range(24) %}
+          <option value="{{ hour }}">{{ '{:02d}:00'.format(hour) }}</option>
+          {% endfor %}
+        </select>
+        <select id="endhourPicker" class="form-control form-control-md">
+          <option value="">to time</option>
+          {% for hour in range(1,25) %}
+          <option value="{{ hour }}">{{ '{:02d}:00'.format(hour) }}</option>
+          {% endfor %}
+        </select>
+        <button id="clearButton" class="btn btn-secondary btn-sm" type="button">Clear</button>
+        
+      </div>
+    </div>
+      
+    <div class="col-md-7" style="display: flex; justify-content: end; align-items: center; gap: 10px;">
+      
+      <button id="virtual-button-update" data-target="#myModal" class="btn btn-secondary btn-lg hide-button" type="button" style="margin-right: 40px;">Update</button>
+      
+      <div class="dropdown">
+        <button class="form-control-lg btn-primary dropdown-toggle" type="button" id="export-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          Export
+          <span class="loading-icon" style="margin-left: 10px; display: none;"><i class="fa fa-spinner fa-spin"></i></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="export-dropdown">
+          <li><a class="dropdown-item" id="export-highprio" href="#" onclick="showExportDialog_highprio()">Export High Priority</a></li>
+          <li><a class="dropdown-item" id="export-middlehigh" href="#" onclick="showExportDialog_middlehigh()">Export Middle High</a></li>
+          <li><a class="dropdown-item" id="export-database" href="#" onclick="showExportDialog_database()">Export Database</a></li>
+        </ul>
+      </div>
+    </div>
+    
+
+  </div>
+  <div class="table-responsive">
+    <div style="margin-bottom: 10px;">
+      <b>Hide/Show:</b>
+      <a href="#" id="toggle-all">[ALL Columns]</a> -
+      <a class="toggle-vis" data-column="1" href="#">Start Time</a> -
+      <a class="toggle-vis" data-column="2" href="#">End Time</a> -
+      <!-- <a class="toggle-vis" data-column="3" href="#">PIC</a> - -->
+      <a class="toggle-vis" data-column="4" href="#">Feedback Final</a> -
+      <a class="toggle-vis" data-column="5" href="#">Qualification Feedback</a> -
+      <a class="toggle-vis" data-column="6" href="#">Note for QC</a> -
+      <a class="toggle-vis" data-column="7" href="#">Assignment Date</a> -
+      
+      <!-- <a class="toggle-vis" data-column="10" href="#">Source</a> - -->
+      <a class="toggle-vis" data-column="10" href="#">Product/Service</a>
+      
+      <div style="margin-left: 212px;">
+      <a class="toggle-vis" data-column="11" href="#">Local Spanish Seller</a> -
+      <a class="toggle-vis" data-column="12" href="#">Cluster</a> -
+      <a class="toggle-vis" data-column="13" href="#">L1</a> -
+      <a class="toggle-vis" data-column="14" href="#">L2</a> -
+      <a class="toggle-vis" data-column="15" href="#">Product Desc</a> -
+      <a class="toggle-vis" data-column="16" href="#">VAT</a> -
+      <a class="toggle-vis" data-column="17" href="#">Company Name</a> -
+      <a class="toggle-vis" data-column="18" href="#">Revenue</a> -
+      <a class="toggle-vis" data-column="19" href="#">Product Count</a>
+    </div>
+    </div>
+    <table id="data" class="table table-striped" data-order='[[ 0, "desc" ]]'>
+        <select id="datashowFilter" class="form-select form-select-md" style="width: 200px; align-items: center"> 
+          <option value="done" selected>Done Records</option>
+          <option value="pending">Pending Records</option>
+          <option value="exported">Exported Records</option>
+          <option value="total">Total Records</option>
+          
+        </select>
+      <thead id="row_data">
+        <tr>
+          {% for column in columns %}
+          <th>{{ column }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
+<!-- <div w3-include-html="{{ url_for('static', filename='modal.html')}}"></div> -->
+<div class="modal" id="myModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Modal header -->
+      <div class="modal-header">
+        <h5 class="modal-title">REMOVE PIC FROM DOMAIN / UPDATE DOMAIN DATA</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+        <style>
+          /* CSS styles for the message text */
+          #message-text {
+              padding: 10px;
+              border-radius: 5px;
+              font-weight: bold;
+              margin-top: 10px;
+          }
+          
+          #message-text.success {
+              color: green;
+              background-color: #d4edda;
+              border-color: #c3e6cb;
+          }
+          
+          #message-text.error {
+              color: red;
+              background-color: #f8d7da;
+              border-color: #f5c6cb;
+          }
+          
+          form label {
+              display: block;
+              margin-bottom: 5px;
+              font-size: x-small;
+              color: #db1e1e;
+              font-weight:bold;
+          }
+          .form-outline {
+              font-size: small;
+              font-display:inherit;
+              
+          }
+          .form-outline .form-control~.form-label {
+              color: #db1e1e;
+              font-weight:bold;
+          }
+  
+          #input-form.disabled input:not(#lead-number):not(#url), 
+          #input-form.disabled select:not(#local_spanish_seller):not(#feedback-final):not(#qualification-feedback):not(#pic){
+                  pointer-events: none;
+                  background-color: #e9ecef;
+          }
+  
+          #input-form.disabled1 input:not(#lead-number):not(#url):not(#vat), 
+          #input-form.disabled1 select:not(#cluster):not(#product-service):not(#local_spanish_seller):not(#feedback-final):not(#qualification-feedback):not(#pic){
+                  pointer-events: none;
+                  background-color: #e9ecef;
+          }
+  
+          #input-form .pointer_none {
+                  pointer-events: none;
+                  background-color: #e9ecef;
+          }
+  
+          .form-outline.copy {
+          position: relative;
+        }
+
+        .form-outline.copy .copy-url {
+          position: absolute;
+          right: 1px;
+          top: 1px;
+          cursor: pointer;
+          padding: 3px 30px;
+          background-color: #f7c565;
+          font-size: 17px;
+          border-radius: 4px;
+      }
+
+      .form-outline .form-control {
+        min-height: auto;
+        padding: 0.53em 0.75em;
+      }
+
+      .col-md-12.mb-4 .form-select {
+        height: 40px;
+        margin-bottom: 30px;
+      }
+  
+      </style>
+    
+
+    <form id="input-form" method="POST" action="/">
+      <div class="row" style="display: flex; justify-content: center; margin-top: 10px;">
+        <div class="col-md-6 mb-4">
+            <div class="row g-2">
+                <div class="col">
+                  <div class="card">
+                    <div >
+                      <select id="pic" name="pic" class="form-select" style="height: 41px; font-weight: bold;">
+                        {% for user in user_options %}
+                          <option value="{{ user }}">{{ user }}</option>
+                          {% endfor %}
+                        
+                        </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="card">
+                    <button id="delete-pic" type="button" style="height:40px; font-size: 0.9rem; font-weight: bold;" class="btn btn-primary btn-block">
+                      Remove PIC on this row
+                  </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <div class="col-md-12 mb-4" style="display: flex; justify-content: center;">
+          <div class="card" style="width: 1100px;">
+            <div class="card-body">
+                <div class="row mb-2">
+                    <!-- <input id="end-time" name="end-time" type="text" hidden> -->
+                    <div class="col-md-8">
+                        <!-- <label for="productServiceSelect">-</label> -->
+                        <div class="form-outline mb-4">
+                            <input type="text" id="lead-number" class="form-control" name="lead-number" tabindex="-1" readonly/>
+                            <label class="form-label" for="form7Example3">LEAD NUMBER</label>
+                        </div>
+    
+                        <!-- Text input -->
+                        <div class="form-outline mb-4 copy">
+                          <input type="text" id="url" class="form-control" name="url" tabindex="-1" readonly/>
+                          <label class="form-label" for="form7Example3">LINK/URL</label>
+                          <div id="copy-button" class="copy-url">
+                            Copy
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <label for="productServiceSelect" >PRODUCT/SERVICE</label>
+                            <select name="product-service" id="product-service" class="form-select reset" >
+                                
+                                <option value="" selected>---Please select---</option>
+                                <option value="Only Services">Only Services</option>
+                                <option value="Only Products">Only Products</option>
+                                <option value="Products & Services">Products & Services</option>
+                                <option value="N/A">N/A</option>
+                            </select>
+                          </div>
+                          <div class="col-md-6">
+                            <label for="productServiceSelect" >LOCAL SPANISH SELLER?</label>
+                            <select name="local_spanish_seller" id="local_spanish_seller" class="form-select reset">
+                                <option value="" selected>---Please select---</option>
+                                <option value="Y">Y</option>
+                                <option value="N">N</option>
+                   
+                            </select>
+                          </div>
+                        </div>
+                        
+                        <div class="row">
+                          <div class="col-md-4">
+                            <label for="productServiceSelect" >CLUSTER</label>
+                          <select name="cluster" id="cluster" class="form-select reset">
+                              <option value="" selected>---Please select---</option>
+                              <option value="B&H">B&H</option>
+                              <option value="EL">EL</option>
+                              <option value="FA">FA</option>
+                              <option value="GCMB">GCMB</option>
+                              <option value="GM">GM</option>
+                              <option value="Other">Other</option>
+                          </select>
+                          
+                          </div>
+                          <div class="col-md-4">
+                            <label for="productServiceSelect" >L1</label>
+                          <select name="l1" id="l1" class="form-select reset">
+                              <option value="" selected>---Please select---</option>
+                              {% for category in categories_l1 %}
+                              <option value="{{ category }}">{{ category }}</option>
+                              {% endfor %}
+                              
+                          </select>
+                          
+                          </div>
+                          <div class="col-md-4"><label for="productServiceSelect" >L2</label>
+                            <select name="l2" id="l2" class="form-select reset" >
+                                <option value="" selected>---Please select---</option>
+                                {% for category in categories_l2 %}
+                                <option value="{{ category }}">{{ category }}</option>
+                                {% endfor %}
+                            </select></div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <label for="productServiceSelect" >PRODUCT DESCRIPTION OR AT LEAST 2 PRODUCT IMAGES</label>
+                            <select name="product_desc_or_at_least_2_product_images" id="product_desc_or_at_least_2_product_images" class="form-select reset">
+                                <option value="" selected>---Please select---</option>
+                                <option value="Y">Y</option>
+                                <option value="N">N</option>
+                  
+                            </select>
+                          </div>
+                        </div>
+                        <div class="form-outline mb-4">
+                            <input type="text" id="vat" name="vat" class="form-control reset" />
+                            <label class="form-label" for="vat">VAT</label>
+                        </div>
+                        <!-- Text input -->
+                        <div class="form-outline mb-4">
+                        <input type="text" id="company-name" name="company-name" class="form-control reset" />
+                        <label class="form-label" for="company-name">COMPANY NAME</label>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <label for="productServiceSelect" >REVENUE</label>
+                            <select name="revenue" id="revenue" class="form-select reset" >
+                                <option value="" selected>---Please select---</option>
+                                <option value="1-250.000">1-250.000</option>
+                                <option value="250.000 -750.000">250.000 -750.000</option>
+                                <option value="750.000 -1.500.000">750.000 -1.500.000</option>
+                                <option value="1.500.000 - 3.000.000">1.500.000 - 3.000.000</option>
+                                <option value="3.000.000 - 50.000.000">3.000.000 - 50.000.000</option>
+                                <option value="More than 50.000.000">More than 50.000.000</option>
+                            </select>
+                          </div>
+    
+                          <div class="col-md-6">
+                            <label for="productServiceSelect" >PRODUCT COUNT</label>
+                            <select name="product-count" id="product-count" class="form-select reset">
+                                <option value="" selected>---Please select---</option>
+                                <option value="0-10">0-10</option>
+                                <option value="11 - 1.000">11 - 1.000</option>
+                                <option value="1.000+">1.000+</option>
+                                <option value="10.000+">10.000+</option>
+                                <option value="50.000+">50.000+</option>
+                                <option value="100.000+">100.000+</option>
+                            </select>
+                          </div>
+                          
+                        </div>
+                        
+    
+                        
+                    </div>
+                    <div class="col-md-4">
+                        
+    
+                        <div class="form-outline mb-4">
+                            <input type="text" name="amount-of-phonenumbers" id="amount-of-phonenumbers" class="form-control" />
+                            <label class="form-label" for="amount-of-phonenumbers">AMOUNT OF PHONE NUMBERS?</label>
+                        </div>
+    
+                        <!-- Text input -->
+                        <div class="form-outline mb-4">
+                        <input type="text" name="telephone" id="telephone" class="form-control reset" />
+                        <label class="form-label" for="telephone">TELEPHONE</label>
+                        </div>
+            
+                        <!-- Text input -->
+                        <div class="form-outline mb-4">
+                        <input type="text" name="telephone1" id="telephone1" class="form-control reset" />
+                        <label class="form-label" for="telephone1">TELEPHONE1</label>
+                        </div>
+            
+                        <!-- Email input -->
+                        <div class="form-outline mb-4">
+                        <input type="text" name="amount-of-emails" id="amount-of-emails" class="form-control" />
+                        <label class="form-label" for="amount-of-emails">AMOUNT OF EMAILS</label>
+                        </div>
+            
+                        <!-- Number input -->
+                        <div class="form-outline mb-4">
+                        <input type="text" name="email" id="email" class="form-control reset" />
+                        <label class="form-label" for="email">EMAIL</label>
+                        </div>
+                        <!-- Text input -->
+                        <div class="form-outline mb-4">
+                            <input type="text" name="email1" id="email1" class="form-control reset" />
+                            <label class="form-label" for="email1">EMAIL1</label>
+                        </div>
+                        <label for="productServiceSelect" >FEEDBACK FINAL</label>
+                        <select name="feedback-final" id="feedback-final" class="form-select reset" >
+                            <option value="" selected>---Please select---</option>
+                            <option value="OK">OK</option>
+                            <option value="NOT OK">NOT OK</option>
+                            <option value="UNCERTAIN">UNCERTAIN</option>
+                            <option value="MAINTENANCE WEBSITE">MAINTENANCE WEBSITE</option>
+                          </select>
+                        <label for="productServiceSelect" >QUALIFICATION FEEDBACK</label>
+                        <select name="qualification-feedback" id="qualification-feedback" class="form-select reset" >
+                            <option value="" selected>---Please select---</option>
+                            <option value="UNCERTAIN - small catalogue less than 10 items">UNCERTAIN - small catalogue less than 10 items</option>
+                            <option value="CATALOGUE - Images Background">CATALOGUE - Images Background</option>
+                            <option value="INACTIVE PAGE - Personal website">INACTIVE PAGE - Personal website</option>
+                            <option value="INACTIVE PAGE - Amazon">INACTIVE PAGE - Amazon</option>
+                            <option value="INACTIVE PAGE - Mainteinance">INACTIVE PAGE - Mainteinance</option>
+                            <option value="INACTIVE PAGE - Register to view pages">INACTIVE PAGE - Register to view pages</option>
+                            <option value="WRONG CATEGORY - Personalised & Services">WRONG CATEGORY - Personalised & Services</option>
+                            <option value="WRONG CATEGORY - Books">WRONG CATEGORY - Books</option>
+                            <option value="WRONG CATEGORY - Sex">WRONG CATEGORY - Sex</option>
+                            <option value="WRONG CATEGORY - CD & DVD">WRONG CATEGORY - CD & DVD</option>
+                            <option value="WRONG CATEGORY - CBD Derivative">WRONG CATEGORY - CBD Derivative</option>
+                            <option value="WRONG CATEGORY - Frozen Products">WRONG CATEGORY - Frozen Products</option>
+                            <option value="WRONG CATEGORY - Spare Parts">WRONG CATEGORY - Spare Parts</option>
+                            <option value="WRONG CATEGORY - Prom & Wedding">WRONG CATEGORY - Prom & Wedding</option>
+                            <option value="WRONG CATEGORY - Smoking Gadgets">WRONG CATEGORY - Smoking Gadgets</option>
+                            <option value="WRONG CATEGORY - Musical Instruments">WRONG CATEGORY - Musical Instruments</option>
+                            <option value="WRONG CATEGORY - Hunting tools">WRONG CATEGORY - Hunting tools</option>
+                            <option value="WRONG CATEGORY - Tools">WRONG CATEGORY - Tools</option>
+                            <option value="WRONG CATEGORY - Software">WRONG CATEGORY - Software</option>
+                            <option value="WRONG CATEGORY - Industrial Tools">WRONG CATEGORY - Industrial Tools</option>
+                            <option value="WRONG CATEGORY - Cake Shop">WRONG CATEGORY - Cake Shop</option>
+                            <option value="NOT APPROPRIATE - Explicit/Violent content">NOT APPROPRIATE - Explicit/Violent content</option>
+                            <option value="NOT APPROPRIATE - Possible Fakes/Fraud">NOT APPROPRIATE - Possible Fakes/Fraud</option>
+                            <option value="NOT EU - Language and currency not EU">NOT EU - Language and currency not EU</option>
+                            <option value="N/A">N/A</option>
+                          </select>
+                          <div class="form-outline mb-4">
+                            <input type="text" name="note" id="note" class="form-control reset" style="height: 50px;"/>
+                            <label class="form-label" for="note" style="color: #1266f1; font-size:small;">NOTE FOR QC</label>
+                        </div>
+
+                          
+                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4"><button type="button" id="save-button-only-modal" style="height:50px; font-size: 0.9rem; font-weight: bold;" class="btn btn-primary btn-block">
+                          Update
+                        </button></div>
+                    </div>
+                    
+            </div>
+              
+            </div>
+          </div>
+        </div>
+      
+        
+      </div>
+    </form>
+
+      </div>
+    </div>
+  </div>
+  <div id="originalData"></div>
+</div>
+
+<!-- End your project here-->
+  
+    <!-- MDB -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/save-load-button.js') }}"></script>
+
+    <script>
+  
+      $(document).ready(function(){
+        var select = document.getElementById("pic");
+          $('#pic option').remove();
+          var option = document.createElement("option");
+          option.text = getCookie('username');
+          option.value = getCookie('username');
+          select.appendChild(option)
+        
+          function getCookie(cookieName) {
+              let cookie = {};
+              document.cookie.split(';').forEach(function(el) {
+                  let [key,value] = el.split('=');
+                  cookie[key.trim()] = value;
+              })
+              return cookie[cookieName];
+              }
+      })
+    
+  
+    </script>
+    <script>
+      function copyUrl() {
+        var urlInput = document.getElementById("url");
+        urlInput.select();
+        urlInput.setSelectionRange(0, 99999); // For mobile devices
+        document.execCommand("copy");
+        
+        var copyButton = document.getElementById("copy-button");
+        copyButton.innerHTML = "Copied!";
+        setTimeout(function() {
+          copyButton.innerHTML = "Copy";
+        }, 2000);
+      }
+  
+      var copyButton = document.getElementById("copy-button");
+      copyButton.addEventListener("click", copyUrl);
+    </script>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/fixedheader/3.2.0/js/dataTables.fixedHeader.min.js"></script>
+
+<!-- table hide columns -->
+<!-- <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script> -->
+
+
+<!-- Link to Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="{{ url_for('static', filename='js/mobiscroll.jquery.min.js')}}"></script>
+
+<script>
+  $(document).ready(function() {
+      // Add a click event listener to the button
+      $('#moveDataButton').click(function() {
+          // Make a GET request to the Flask route
+          $.get('/move_to_google_sheet', function(response) {
+              // Display the response message
+              alert(response);
+          });
+      });
+  });
+</script>
+
+<script>
+  function includeHTML() {
+    var z, i, elmnt, file, xhttp;
+    /* Loop through a collection of all HTML elements: */
+    z = document.getElementsByTagName("*");
+    for (i = 0; i < z.length; i++) {
+      elmnt = z[i];
+      /*search for elements with a certain atrribute:*/
+      file = elmnt.getAttribute("w3-include-html");
+      if (file) {
+        /* Make an HTTP request using the attribute value as the file name: */
+        xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4) {
+            if (this.status == 200) {elmnt.innerHTML = this.responseText;}
+            if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
+            /* Remove the attribute, and call this function once more: */
+            elmnt.removeAttribute("w3-include-html");
+            includeHTML();
+          }
+        }
+        xhttp.open("GET", file, true);
+        xhttp.send();
+        /* Exit the function: */
+        return;
+      }
+    }
+  }
+  includeHTML();
+  </script>
+
+<script>
+  $(document).ready(function () {
+    
+
+    $.extend($.fn.dataTable.ext.classes, {
+      sWrapper: "dataTables_wrapper dt-bootstrap5",
+      sFilterInput: "form-control form-control-md", // Remove col-md-4 class
+      sLengthSelect: "form-select",
+    });
+
+    $.extend(true, DataTable.defaults, {
+      dom:
+        "<'row'<'col-md-6'l><'col-md-6'f>>" +
+        "<'row'<'col-sm-12'tr>>" +
+        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      renderer: 'bootstrap',
+      language: {
+        searchPlaceholder: "Filter here..."
+      },
+    });
+    
+    var dataTable = $('#data').DataTable({
+      stateSave: true,
+      scrollY:          600,
+        scrollX:        true,
+        scrollCollapse: true,
+        paging:         true,
+        fixedColumns:   {
+            left: 1,
+            right: 0
+        },
+        
+        fixedHeader:           {
+            header: true,
+            footer: true
+        },
+      lengthMenu: [100, 300, 500, 1000, 10000, 10000000],
+      columns: [
+      { data: 'id', title: 'id'},
+        { data: 'start_time', title: 'Start Time' },
+        { data: 'end_time', title: 'End Time' },
+        { data: 'pic', title: 'PIC' },
+        { data: 'feedback_final', title: 'Feedback Final' },
+        { data: 'qualification_feedback', title: 'Qualification Feedback' },
+        { data: 'note_for_qc', title: 'Note for QC' },
+        { data: 'assignment_date', title: 'Assignment Date' },
+        { data: 'lead_number', title: 'Lead Number' },
+        {
+          data: 'url',
+          title: 'URL',
+          width: '100px',
+          className: 'url-column',
+          render: function(data, type, row) {
+            if (type === 'display') {
+              return '<p>WEB:<a href="' + data + '" target="_blank" style="text-decoration:none;">' + data + '</a></p>';
+            }
+            return data;
+          }
+        },
+        // { data: 'source', title: 'Source' },
+        { data: 'product_service', title: 'Product/Service' },
+        { data: 'is_local_spanish_seller', title: 'Local Spanish Seller' },
+        { data: 'cluster', title: 'Cluster' },
+        { data: 'l1', title: 'L1' },
+        { data: 'l2', title: 'L2' },
+        { data: 'product_desc_or_at_least_2_product_images', title: 'Product Description' },
+        { data: 'vat', title: 'VAT' },
+        { data: 'company_name', title: 'Company Name' },
+        { data: 'revenue', title: 'Revenue' },
+        { data: 'product_count', title: 'Product Count' },
+        { data: 'amount_phone_number', title: 'Amount of Phone Numbers' },
+        { data: 'telephone', title: 'Telephone' },
+        { data: 'telephone1', title: 'Telephone 1' },
+        { data: 'amount_emails', title: 'Amount of Emails' },
+        { data: 'email', title: 'Email' },
+        { data: 'email1', title: 'Email 1' },
+        // { data: 'resolution_date', title: 'Resolution Date' },
+        // { data: 'leads_id', title: 'Leads ID' },
+        // { data: 'prio', title: 'Prio' },
+        { data: 'file_name', title: 'Batch Name' },
+        // {data: 'lead_id', title: 'Lead ID'}
+      ],
+      
+    });
+    // Create a custom container for lengthMenu and datashowFilter
+var container = $('<div class="col-md-6"></div>');
+
+// Move the lengthMenu into the custom container
+container.append($('#data_wrapper .dataTables_length'));
+
+// Create a new div to contain the datashowFilter and align it to the right
+var filterContainer = $('<div class="float-right"></div>');
+
+// Add the datashowFilter to the filterContainer
+filterContainer.append($('#datashowFilter'));
+
+// Add the filterContainer to the custom container
+container.append(filterContainer);
+
+// Replace the existing container with the custom container
+$('#data_wrapper .row:first-child .col-md-6:first-child').replaceWith(container);
+    // Event listener for column toggle links
+$('a.toggle-vis').on('click', function(e) {
+  e.preventDefault();
+
+  // Get the column API object
+  var column = dataTable.column($(this).attr('data-column'));
+
+  // Toggle the visibility
+  column.visible(!column.visible());
+
+  // Apply CSS classes based on visibility state
+  if (column.visible()) {
+    $(this).removeClass('hidden').addClass('visible');
+  } else {
+    $(this).removeClass('visible').addClass('hidden');
+  }
+
+  // Apply CSS class for active state
+  $(this).toggleClass('active');
+
+  // Apply CSS style for text color and strike effect
+  if (column.visible()) {
+    $(this).css('color', 'blue');
+    $(this).css('text-decoration', 'none');
+  } else {
+    $(this).css('color', 'gray');
+    $(this).css('text-decoration', 'line-through');
+  }
+
+  // Save the visibility state in localStorage
+  const columnId = $(this).attr('data-column');
+  const isVisible = column.visible();
+  localStorage.setItem(`column-${columnId}`, isVisible ? 'visible' : 'hidden');
+});
+
+// Event listener for the "All" link
+$('a#toggle-all').on('click', function(e) {
+  e.preventDefault();
+
+  var columnLinks = $('a.toggle-vis');
+
+  // Check if any column is hidden
+  var isAnyColumnHidden = columnLinks.hasClass('hidden');
+
+  // Toggle visibility of all columns
+  columnLinks.each(function() {
+    var column = dataTable.column($(this).attr('data-column'));
+    column.visible(isAnyColumnHidden);
+
+    // Apply CSS classes based on visibility state
+    if (isAnyColumnHidden) {
+      $(this).removeClass('hidden').addClass('visible');
+    } else {
+      $(this).removeClass('visible').addClass('hidden');
+    }
+
+    // Apply CSS class for active state
+    $(this).toggleClass('active');
+
+    // Apply CSS style for text color and strike effect
+    if (isAnyColumnHidden) {
+      $(this).css('color', 'blue');
+      $(this).css('text-decoration', 'none');
+    } else {
+      $(this).css('color', 'gray');
+      $(this).css('text-decoration', 'line-through');
+    }
+
+    // Save the visibility state in localStorage
+    const columnId = $(this).attr('data-column');
+    const isVisible = column.visible();
+    localStorage.setItem(`column-${columnId}`, isVisible ? 'visible' : 'hidden');
+  });
+});
+
+// Restore column visibility on page load
+$(document).ready(function() {
+  $('a.toggle-vis').each(function() {
+    const columnId = $(this).attr('data-column');
+    const visibility = localStorage.getItem(`column-${columnId}`);
+    if (visibility === 'hidden') {
+      var column = dataTable.column($(this).attr('data-column'));
+      column.visible(false);
+
+      // Apply CSS classes for hidden state
+      $(this).removeClass('visible').addClass('hidden');
+      $(this).addClass('active');
+
+      // Apply CSS style for hidden state
+      $(this).css('color', 'gray');
+      $(this).css('text-decoration', 'line-through');
+    }
+  });
+});
+
+
+
+
+
+    var $virtualButton = $('#virtual-button-update');
+
+$('#data tbody').on('click', 'tr', function () {
+  if ($(this).hasClass('selected')) {
+    $(this).removeClass('selected');
+    $virtualButton.hide(); // Hide the virtual button when a row is deselected
+  } else {
+    dataTable.$('tr.selected').removeClass('selected');
+    $(this).addClass('selected');
+    $virtualButton.show(); // Show the virtual button when a row is selected
+  }
+});
+
+$('#virtual-button-update').click(function () {
+  var get_cookies = getCookie('role');
+    console.log(get_cookies)
+      if (typeof get_cookies === 'undefined'){
+        window.location.href = '/';
+      }
+       if (get_cookies == 'user' || typeof get_cookies === 'undefined') {
+        alert('Permission denied!')
+       }
+       else{
+        var form = document.querySelector("#myModal #input-form");
+        form.classList.remove('disabled')
+
+        var existingMessage = document.querySelector("#message-text");
+        if (existingMessage) {
+          existingMessage.parentNode.removeChild(existingMessage);
+        }
+        var selectedRows = dataTable.rows('.selected').nodes();
+
+        if (selectedRows.length > 0) {
+          var rowData = [];
+
+          $(selectedRows).each(function () {
+            var columnValues = [];
+            var row = $(this).find('td');
+
+            $(row).each(function () {
+              var cellData = $(this).text().trim();
+              columnValues.push(cellData);
+            });
+
+            rowData.push(columnValues);
+          });
+
+          loadModalData(rowData);
+        } else {
+          alert('No rows selected.');
+        }
+       }
+  
+});
+
+function loadModalData(rowData) {
+  if (rowData.length > 0) {
+    var firstRow = rowData[0];
+
+    // Define the regular expression pattern
+    var urlRegex = /^WEB:/;
+
+    // Find the column index for "url" based on the regular expression pattern
+    var urlIndex = firstRow.findIndex(function(value) {
+      return urlRegex.test(value);
+    });
+
+    if (urlIndex !== -1) {
+      var url = firstRow[urlIndex];
+      var leadNumberIndex = urlIndex - 1;
+
+      if (leadNumberIndex >= 0) {
+        var leadNumber = firstRow[leadNumberIndex];
+
+        // Make an AJAX request to fetch the data from the server
+        $.ajax({
+          url: '/api/modal',
+          method: 'GET',
+          data: {
+            'url': url,
+            'lead-number': leadNumber
+          },
+          success: function(response) {
+            var picValue = response.pic;
+            // Populate the modal with the server's response
+            $('#myModal #end-time').val(response.end_time);
+            $('#myModal #pic').val(picValue);
+            $('#myModal #pic option:not([value="' + picValue + '"])').hide();
+            $('#myModal #pic option[value="' + picValue + '"]').show();
+            $('#myModal #feedback-final').val(response.feedback_final);
+            $('#myModal #qualification-feedback').val(response.qualification_feedback);
+            $('#myModal #note').val(response.note_for_qc);
+            $('#myModal #lead-number').val(leadNumber);
+            $('#myModal #url').val(response.url);
+            $('#myModal #product-service').val(response.product_service);
+            $('#myModal #local_spanish_seller').val(response.is_local_spanish_seller);
+            $('#myModal #cluster').val(response.cluster);
+            $('#myModal #l1').val(response.l1);
+            $('#myModal #l2').val(response.l2);
+            $('#myModal #product_desc_or_at_least_2_product_images').val(response.product_desc_or_at_least_2_product_images);
+            $('#myModal #vat').val(response.vat);
+            $('#myModal #company-name').val(response.company_name);
+            $('#myModal #revenue').val(response.revenue);
+            $('#myModal #product-count').val(response.product_count);
+            $('#myModal #amount-of-phonenumbers').val(response.amount_phone_number);
+            $('#myModal #telephone').val(response.telephone);
+            $('#myModal #telephone1').val(response.telephone1);
+            $('#myModal #amount-of-emails').val(response.amount_emails);
+            $('#myModal #email').val(response.email);
+            $('#myModal #email1').val(response.email1);
+
+            $('#myModal').modal('show');
+          },
+          error: function(error) {
+            console.log('Error:', error);
+          }
+        });
+      } else {
+        console.log('Lead Number column not found');
+      }
+    } else {
+      console.log('URL column not found');
+    }
+  }
+}
+
+
+
+
+    $(document).ready(function() {
+      $('#starthourPicker').change(function() {
+        var startHour = parseInt($(this).val());
+
+        $('#endhourPicker option').each(function() {
+          var endHour = parseInt($(this).val());
+
+          if (endHour <= startHour) {
+            $(this).hide();
+          } else {
+            $(this).show();
+          }
+        });
+      });
+      $('#endhourPicker').change(function() {
+        var endHour = parseInt($(this).val());
+
+        $('#starthourPicker option').each(function() {
+          var startHour = parseInt($(this).val());
+
+          if (startHour >= endHour) {
+            $(this).hide();
+          } else {
+            $(this).show();
+          }
+        });
+      });
+    });
+
+    $('#clearButton').click(function() {
+      $('#datePicker').val('');
+      $('#starthourPicker').val('');
+      $('#endhourPicker').val('');
+
+      // Fetch data with empty values to clear the table
+      // Fetch initial data
+      fetch('/api/data')
+        .then(response => response.json())
+        .then(data => {
+          dataTable.clear();
+          dataTable.rows.add(data.data);
+          dataTable.draw();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error loading data from the server.');
+        });
+    });
+    
+    $('#datePicker, #starthourPicker, #endhourPicker').on('change', function () {
+      var selectedDate = $('#datePicker').val();
+      var selectedstarttime = $('#starthourPicker').val();
+      var selectedendtime = $('#endhourPicker').val();
+      // Fetch data based on the selected date and time
+      fetch('/api/data?datePicker=' + selectedDate + '&starttimePicker=' + selectedstarttime + '&endtimePicker=' + selectedendtime )
+        .then(response => response.json())
+        .then(data => {
+          dataTable.clear();
+          dataTable.rows.add(data.data);
+          dataTable.draw();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error loading data from the server.');
+        });
+    });
+
+    $('#datashowFilter').on('change', function() {
+  var selectedOption = $(this).val();
+  $('#data').find('tr').remove();
+  var loadingRow = $('<td class="text-center" style="font-weight:bold; float: right;"><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Loading...</td>');
+
+  // Show loading icon above the table
+  $(this).after(loadingRow);
+
+  // Fetch data based on the selected option
+  fetch('/api/data?datashow_filter=' + selectedOption)
+    .then(response => response.json())
+    .then(data => {
+      dataTable.clear();
+      dataTable.rows.add(data.data);
+      dataTable.draw();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error loading data from the server.');
+    })
+    .finally(() => {
+      // Hide loading icon inside the table
+      loadingRow.remove();
+    });
+});
+
+
+    // Fetch initial data
+    fetch('/api/data')
+      .then(response => response.json())
+      .then(data => {
+        dataTable.clear();
+        dataTable.rows.add(data.data);
+        dataTable.draw();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error loading data from the server.');
+      });
+  });
+
+</script>
+
+
+<script>
+  
+  function getCookie(cookieName) {
+        let cookie = {};
+        document.cookie.split(';').forEach(function(el) {
+            let [key,value] = el.split('=');
+            cookie[key.trim()] = value;
+        })
+        return cookie[cookieName];
+        }
+
+</script>
+
+<script>
+  document.getElementById('save-button-only-modal').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Get the selected option from the #product-service dropdown
+    var productServiceSelect = document.querySelector("#product-service");
+    var productServiceOption = productServiceSelect.value;
+    productServiceSelect.style.border = "";
+    var feedbackFinalSelect = document.querySelector("#feedback-final");
+    feedbackFinalSelect.style.border = "";
+    var qualificationFeedbackSelect = document.querySelector("#qualification-feedback");
+    qualificationFeedbackSelect.style.border = "";
+
+    var telephoneInput = document.querySelector("#telephone");
+    telephoneInput.style.border = "";
+
+    var telephoneValue = telephoneInput.value;
+    var digitPattern = /\d/; // Regular expression to check for at least one digit
+
+    if (telephoneValue !== "" && !digitPattern.test(telephoneValue)) {
+        alert("Wrong telephone format!");
+        telephoneInput.style.border = "2px solid red";
+    } 
+
+    var telephoneInput1 = document.querySelector("#telephone1");
+    telephoneInput1.style.border = "";
+
+    var telephoneValue1 = telephoneInput1.value;
+    console.log(telephoneValue1)
+    var digitPattern = /\d/; // Regular expression to check for at least one digit
+
+    if (telephoneValue1 !== "" && !digitPattern.test(telephoneValue1)) {
+        alert("Wrong telephone1 format!");
+        telephoneInput1.style.border = "2px solid red";
+    } 
+
+    
+
+    var emailInput = document.querySelector("#email");
+    emailInput.style.border = "";
+
+    var emailValue = emailInput.value;
+    var digitPattern = /@/; // Regular expression to check for at least one digit
+
+    if (emailValue !== "" && !digitPattern.test(emailValue)) {
+        alert("Wrong email format!");
+        emailInput.style.border = "2px solid red";
+    } 
+
+    var emailInput1 = document.querySelector("#email1");
+    emailInput1.style.border = "";
+
+    var emailValue1 = emailInput1.value;
+    var digitPattern = /@/; // Regular expression to check for at least one digit
+
+    if (emailValue1 !== "" && !digitPattern.test(emailValue1)) {
+        alert("Wrong email1 format!");
+        emailInput1.style.border = "2px solid red";
+    } 
+
+    // Check if the productServiceOption is blank
+    if (productServiceOption === "") {
+      // Get the selected options from #feedback-final and #qualification-feedback dropdowns
+      var feedbackFinalOption = feedbackFinalSelect.value;
+      var qualificationFeedbackOption = qualificationFeedbackSelect.value;
+
+      // Check if either feedbackFinalOption or qualificationFeedbackOption is chosen
+      if (feedbackFinalOption || qualificationFeedbackOption) {
+        feedbackFinalSelect.style.border = "";
+        qualificationFeedbackSelect.style.border = "";
+      }
+      else{
+        alert("PRODUCT/SERVICE blank! Please select FEEDBACK FINAL or QUALIFICATION FEEDBACK");
+        productServiceSelect.style.border = "2px solid green";
+        feedbackFinalSelect.style.border = "2px solid red";
+        qualificationFeedbackSelect.style.border = "2px solid red";
+      }
+    // } else if (productServiceOption === 'Only Products' || productServiceOption ==='Products & Services'){
+    //     var localSpanishSelect = document.querySelector("#local_spanish_seller");
+    //     var localSpanishOption = localSpanishSelect.value;
+    //     localSpanishSelect.style.border = "";
+    //     if (localSpanishOption == 'Y'){
+    //       var feedbackFinalOption = feedbackFinalSelect.value;
+    //       var qualificationFeedbackOption = qualificationFeedbackSelect.value;
+          
+    //       if (feedbackFinalOption || qualificationFeedbackOption) {
+    //         feedbackFinalSelect.style.border = "";
+    //         qualificationFeedbackSelect.style.border = "";
+    //       }
+    //       else{
+    //         alert("LOCAL SPANISH SELLER is "+localSpanishOption+" ! Please select FEEDBACK FINAL or QUALIFICATION FEEDBACK");
+    //         localSpanishSelect.style.border = "2px solid green";
+    //         feedbackFinalSelect.style.border = "2px solid red";
+    //         qualificationFeedbackSelect.style.border = "2px solid red";
+    //       }
+    //     }
+
+    }
+
+    else {
+      var formData = new FormData(document.querySelector("#input-form"));
+
+      // Check if a message element already exists and remove it if it does
+      var existingMessage = document.querySelector("#message-text");
+      if (existingMessage) {
+        existingMessage.parentNode.removeChild(existingMessage);
+      }
+
+      // Create a new element to display the "Updated" or "Error" message
+      var messageText = document.createElement("div");
+      messageText.id = "message-text";
+
+      // Send the form data to the server using AJAX
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/", true); // Replace "/" with the appropriate server-side endpoint
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          var pic = document.getElementById("pic").value;
+          var leadnumber = document.getElementById("lead-number").value;
+          if (xhr.status === 200) {
+            // Display the "Updated" message after successful submission
+            messageText.textContent = "Updated! - " + leadnumber;
+            messageText.className = "success";
+          } else if (xhr.status === 500) {
+            // Check if the response contains an error message for URL and PIC mismatch
+            var response = JSON.parse(xhr.responseText);
+            if (response.error === "URL and PIC mismatch") {
+              messageText.textContent = "Error: URL and PIC already exists";
+              messageText.className = "error";
+            } else if (response.error === "URL already exists") {
+              messageText.textContent = "Error: URL already exists";
+              messageText.className = "error";
+            } else if (response.error === "Missing URL or PIC") {
+              messageText.textContent = "Error: Missing URL or PIC";
+              messageText.className = "error";
+            } else {
+              messageText.textContent = "Error: An error occurred";
+              messageText.className = "error";
+            }
+          } else {
+            // Display a generic error message for other errors
+            messageText.textContent = "Error: An error occurred";
+            messageText.className = "error";
+          }
+
+          // Insert the message element after the Save button
+          document.getElementById('save-button-only-modal').parentNode.insertBefore(messageText, document.getElementById('save-button-only-modal').nextSibling);
+        }
+      };
+      xhr.send(formData);
+    }
+
+
+    var product_descSelect = document.querySelector("#product_desc_or_at_least_2_product_images");
+    product_descSelect.style.border = "";
+    event.preventDefault(); // Prevent the default form submission
+
+    var productCountSelect = document.querySelector("#product-count");
+    var productCountOption = productCountSelect.value;
+    productCountSelect.style.border = "";
+
+    // // Check if the productServiceOption is blank
+    // if (productCountOption) {
+    //   // Get the selected options from #feedback-final and #qualification-feedback dropdowns
+    //   var product_descOption = product_descSelect.value;
+
+    //   // Check if either feedbackFinalOption or qualificationFeedbackOption is chosen
+    //   if (product_descOption) {
+    //     product_descSelect.style.border = "";
+    //     productCountSelect.style.border = "";
+    //   }
+    //   else{
+    //       alert("Have PRODUCT COUNT! Please select PRODUCT DESCRIPTION OR AT LEAST 2 PRODUCT IMAGES");
+    //       product_descSelect.style.border = "2px solid red";
+    //       productCountSelect.style.border = "2px solid green";
+    //     }
+    // } 
+    if (telephoneInput.style.border ||telephoneInput1.style.border || emailInput.style.border || emailInput1.style.border || feedbackFinalSelect.style.border || qualificationFeedbackSelect.style.border || productServiceSelect.style.border || product_descSelect.style.border || productCountSelect.style.border) {
+          //alert("Please correct the form errors before submitting.");
+          return; // Prevent further execution of the function
+        }
+    else{
+      var formData = new FormData(document.querySelector("#input-form"));
+
+      // Check if a message element already exists and remove it if it does
+      var existingMessage = document.querySelector("#message-text");
+      if (existingMessage) {
+        existingMessage.parentNode.removeChild(existingMessage);
+      }
+
+      // Create a new element to display the "Updated" or "Error" message
+      var messageText = document.createElement("div");
+      messageText.id = "message-text";
+
+      // Send the form data to the server using AJAX
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/", true); // Replace "/" with the appropriate server-side endpoint
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          var pic = document.getElementById("pic").value;
+          var leadnumber = document.getElementById("lead-number").value;
+          if (xhr.status === 200) {
+            // Display the "Updated" message after successful submission
+            messageText.textContent = "Updated! - " + leadnumber;
+            messageText.className = "success";
+          } else if (xhr.status === 500) {
+            // Check if the response contains an error message for URL and PIC mismatch
+            var response = JSON.parse(xhr.responseText);
+            if (response.error === "URL and PIC mismatch") {
+              messageText.textContent = "Error: URL and PIC already exists";
+              messageText.className = "error";
+            } else if (response.error === "URL already exists") {
+              messageText.textContent = "Error: URL already exists";
+              messageText.className = "error";
+            } else if (response.error === "Missing URL or PIC") {
+              messageText.textContent = "Error: Missing URL or PIC";
+              messageText.className = "error";
+            } else {
+              messageText.textContent = "Error: An error occurred";
+              messageText.className = "error";
+            }
+          } else {
+            // Display a generic error message for other errors
+            messageText.textContent = "Error: An error occurred";
+            messageText.className = "error";
+          }
+
+          // Insert the message element after the Save button
+          document.getElementById('save-button-only-modal').parentNode.insertBefore(messageText, document.getElementById('save-button-only-modal').nextSibling);
+        }
+      };
+      xhr.send(formData);
+    }
+
+  });
+</script>
+
+<script>
+  document.getElementById('delete-pic').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Get the form data
+    var formData = new FormData(document.querySelector("#myModal #input-form"));
+
+    // Check if a message element already exists and remove it if it does
+    var existingMessage = document.querySelector("#message-text");
+    if (existingMessage) {
+      existingMessage.parentNode.removeChild(existingMessage);
+    }
+
+    // Create a new element to display the "Updated" or "Error" message
+    var messageText = document.createElement("div");
+    messageText.id = "message-text";
+
+    // Send the form data to the server using AJAX
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/delete-pic", true); // Replace "/" with the appropriate server-side endpoint
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        var leadnumber = document.getElementById("lead-number").value;
+        if (xhr.status === 200) {
+          // Display the "Updated" message after successful submission
+          messageText.textContent = "Deleted! - " + leadnumber;
+          messageText.className = "success";
+          //location.reload();
+        } else if (xhr.status === 500) {
+          // Check if the response contains an error message for URL and PIC mismatch
+          var response = JSON.parse(xhr.responseText);
+          if (response.error === "URL and PIC mismatch") {
+            messageText.textContent = "Error: URL and PIC already exists";
+            messageText.className = "error";
+          } else if (response.error === "URL already exists") {
+            messageText.textContent = "Error: URL already exists";
+            messageText.className = "error";
+          } else if (response.error === "Missing URL or PIC") {
+            messageText.textContent = "Error: Missing URL or PIC";
+            messageText.className = "error";
+          } else {
+            messageText.textContent = "Error: An error occurred";
+            messageText.className = "error";
+          }
+        } else {
+          // Display a generic error message for other errors
+          messageText.textContent = "Error: An error occurred";
+          messageText.className = "error";
+        }
+
+        // Insert the message element after the Save button
+        var deletePICbutton = document.getElementById('delete-pic');
+        deletePICbutton.parentElement.insertBefore(messageText, deletePICbutton.nextSibling);
+      }
+    };
+    xhr.send(formData);
+  });
+</script>
+
+<script>
+  function showExportDialog_database() {
+    var get_cookies = getCookie('role');
+    console.log(get_cookies)
+       if (get_cookies == 'user' || typeof get_cookies === 'undefined') {
+        alert('Permission denied!')
+       }
+       else{
+        // Show the export dialog
+        $('#export-dialog-database').modal('show');
+       }
+    
+  }
+
+  function showExportDialog_highprio() {
+    var get_cookies = getCookie('role');
+    console.log(get_cookies)
+       if (get_cookies == 'user' || typeof get_cookies === 'undefined') {
+        alert('Permission denied!')
+       }
+       else{
+        // Show the export dialog
+        $('#export-dialog-highprio').modal('show');
+       }
+    
+  }
+
+  function showExportDialog_middlehigh() {
+    var get_cookies = getCookie('role');
+    console.log(get_cookies)
+       if (get_cookies == 'user' || typeof get_cookies === 'undefined') {
+        alert('Permission denied!')
+       }
+       else{
+        // Show the export dialog
+        $('#export-dialog-middlehigh').modal('show');
+       }
+    
+  }
+
+  function closeExportDialog() {
+    // Hide the export dialog
+    $('#export-dialog-database').modal('hide');
+    $('#export-dialog-highprio').modal('hide');
+    $('#export-dialog-middlehigh').modal('hide');
+  }
+
+  function closeConfirmDialog() {
+    $('#exportConfirmationModal').modal('hide');
+  }
+
+  function exportToExcel_database() {
+    // Get the limit of results from the input field
+    var limit = document.getElementById('limit-input-database').value;
+
+    // Close the export dialog
+    $('#export-dialog-database').modal('hide');
+
+    // Disable the export button
+    var exportButton = document.getElementById('export-database');
+    exportButton.disabled = true;
+
+    // Show the loading icon
+    $('.loading-icon').show();
+
+    // Make an AJAX request to the server-side endpoint with the limit parameter
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/export_to_xlsx?template=database&limit=' + limit, true);
+    xhr.responseType = 'blob';
+
+    // Handle the response
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        // Create a download link for the Excel file
+        var blob = new Blob([xhr.response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+
+        // Generate the file name with the current day
+        var currentDate = new Date();
+        var day = String(currentDate.getDate()).padStart(2, '0');
+        var month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        var year = currentDate.getFullYear();
+        var fileName = 'Miravia_[Database]_' + day + month + year + '.xlsx';
+        link.download = fileName;
+
+        // Append the download link to the document body
+        document.body.appendChild(link);
+
+        // Trigger the click event
+        link.click();
+
+        // Remove the download link from the document body
+        document.body.removeChild(link);
+
+        // Get the Lead-Number-List from the response headers
+        var leadNumberListHeader = xhr.getResponseHeader('Lead-Number-List');
+        var leadNumberList = JSON.parse(leadNumberListHeader);
+
+        $(document).on('click', '#saveExportedBtn', function() {
+
+        // Call the server-side endpoint to update the is_exported column and send leadNumberList
+        updateIsExported(leadNumberList);
+        closeConfirmDialog();
+        location.reload();
+        });
+
+      }
+
+      // Hide the loading icon
+      $('.loading-icon').hide();
+
+      // Enable the export button
+      exportButton.disabled = false;
+
+      // Show the export confirmation modal
+      $('#exportConfirmationModal').modal('show');
+    };
+
+    // Send the AJAX request
+    xhr.send();
+  }
+
+  function exportToExcel_highprio() {
+    // Get the limit of results from the input field
+    var limit = document.getElementById('limit-input-highprio').value;
+
+    // Close the export dialog
+    $('#export-dialog-highprio').modal('hide');
+
+    // Disable the export button
+    var exportButton = document.getElementById('export-highprio');
+    exportButton.disabled = true;
+
+    // Show the loading icon
+    $('.loading-icon').show();
+
+    // Make an AJAX request to the server-side endpoint with the limit parameter
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/export_to_xlsx?template=highprio&limit=' + limit, true);
+    xhr.responseType = 'blob';
+
+    // Handle the response
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        // Create a download link for the Excel file
+        var blob = new Blob([xhr.response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+
+        // Generate the file name with the current day
+        var currentDate = new Date();
+        var day = String(currentDate.getDate()).padStart(2, '0');
+        var month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        var year = currentDate.getFullYear();
+        var fileName = 'Miravia_[High Priority]_' + day + month + year + '.xlsx';
+        link.download = fileName;
+
+        // Append the download link to the document body
+        document.body.appendChild(link);
+
+        // Trigger the click event
+        link.click();
+
+        // Remove the download link from the document body
+        document.body.removeChild(link);
+
+        // Get the Lead-Number-List from the response headers
+        var leadNumberListHeader = xhr.getResponseHeader('Lead-Number-List');
+        var leadNumberList = JSON.parse(leadNumberListHeader);
+
+        $(document).on('click', '#saveExportedBtn', function() {
+
+        // Call the server-side endpoint to update the is_exported column and send leadNumberList
+        updateIsExported(leadNumberList);
+        closeConfirmDialog();
+        location.reload();
+        });
+
+      }
+
+      // Hide the loading icon
+      $('.loading-icon').hide();
+
+      // Enable the export button
+      exportButton.disabled = false;
+
+      // Show the export confirmation modal
+      $('#exportConfirmationModal').modal('show');
+    };
+
+    // Send the AJAX request
+    xhr.send();
+  }
+
+  function exportToExcel_middlehigh() {
+    // Get the limit of results from the input field
+    var limit = document.getElementById('limit-input-middlehigh').value;
+
+    // Close the export dialog
+    $('#export-dialog-middlehigh').modal('hide');
+
+    // Disable the export button
+    var exportButton = document.getElementById('export-middlehigh');
+    exportButton.disabled = true;
+
+    // Show the loading icon
+    $('.loading-icon').show();
+
+    // Make an AJAX request to the server-side endpoint with the limit parameter
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/export_to_xlsx?template=middlehigh&limit=' + limit, true);
+    xhr.responseType = 'blob';
+
+    // Handle the response
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        // Create a download link for the Excel file
+        var blob = new Blob([xhr.response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+
+        // Generate the file name with the current day
+        var currentDate = new Date();
+        var day = String(currentDate.getDate()).padStart(2, '0');
+        var month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        var year = currentDate.getFullYear();
+        var fileName = 'Miravia_[Middle High]_' + day + month + year + '.xlsx';
+        link.download = fileName;
+
+        // Append the download link to the document body
+        document.body.appendChild(link);
+
+        // Trigger the click event
+        link.click();
+
+        // Remove the download link from the document body
+        document.body.removeChild(link);
+
+        // Get the Lead-Number-List from the response headers
+        var leadNumberListHeader = xhr.getResponseHeader('Lead-Number-List');
+        var leadNumberList = JSON.parse(leadNumberListHeader);
+
+        $(document).on('click', '#saveExportedBtn', function() {
+
+        // Call the server-side endpoint to update the is_exported column and send leadNumberList
+        updateIsExported(leadNumberList);
+        closeConfirmDialog();
+        location.reload();
+        });
+
+      }
+
+      // Hide the loading icon
+      $('.loading-icon').hide();
+
+      // Enable the export button
+      exportButton.disabled = false;
+
+      // Show the export confirmation modal
+      $('#exportConfirmationModal').modal('show');
+    };
+
+    // Send the AJAX request
+    xhr.send();
+  }
+
+
+  // Handle the click event of the "Save Exported" button
+  function updateIsExported(leadNumberList) {
+    // Make an AJAX request to the server-side endpoint to update the is_exported column
+    $.ajax({
+      url: '/update_is_exported',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ leadNumberList: leadNumberList }), // Send leadNumberList in the request body
+      success: function(response) {
+        console.log('Update successful');
+        // Handle the success response, if needed
+      },
+      error: function(xhr, status, error) {
+        console.log('Update failed:', error);
+        // Handle the error, if needed
+      }
+    });
+  }
+</script>
+
+<!-- Export Database Dialog -->
+<div class="modal" id="export-dialog-database" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Export Settings</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeExportDialog()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="limit-input-database">Limit of Results:</label>
+          <input type="number" class="form-control" id="limit-input-database" placeholder="Enter the limit of results">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="exportToExcel_database()">Export</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeExportDialog()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export High Prio Dialog -->
+<div class="modal" id="export-dialog-highprio" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Export Settings</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeExportDialog()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="limit-input-highprio">Limit of Results:</label>
+          <input type="number" class="form-control" id="limit-input-highprio" placeholder="Enter the limit of results">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="exportToExcel_highprio()">Export</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeExportDialog()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export Middle High Dialog -->
+<div class="modal" id="export-dialog-middlehigh" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Export Settings</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeExportDialog()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="limit-input-middlehigh">Limit of Results:</label>
+          <input type="number" class="form-control" id="limit-input-middlehigh" placeholder="Enter the limit of results">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="exportToExcel_middlehigh()">Export</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeExportDialog()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirm Exported -->
+<div class="modal fade" id="exportConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="exportConfirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exportConfirmationModalLabel">Export Confirmation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeConfirmDialog()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Confirm change status EXPORTED to database? 
+           Note: if SAVE CHANGES, this results can not be export again.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="saveExportedBtn">Save Changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeConfirmDialog()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
