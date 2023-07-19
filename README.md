@@ -2,12 +2,6 @@
 - Automate input process, report and manage users.
 - Running on server host with apache2.
 
-![Screenshort](LoginPage.png)
-![Screenshort](Home.png)
-![Screenshort](DatabaseQC.png)
-![Screenshort](ErrorLog.png)
-![Screenshort](FileImportedReport.png)
-![Screenshort](UserRecords.png)
-![Screenshort](RevenueDashboard.png)
+Go to "miravia" folder for more details.
 
 "# miravia-project" 
