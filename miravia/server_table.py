@@ -10,7 +10,7 @@ from io import BytesIO
 
 
 app = Flask(__name__)
-app.config['DATABASE_URI'] = 'postgresql://postgres:123456@192.168.101.236/postgres'
+app.config['DATABASE_URI'] = 'postgresql://xxx:xxxx@192.168.xxx.xxx/postgres'
 
 class User:
     def __init__(self, assignment_date, lead_number, source, url, product_service, is_local_spanish_seller, vat, cluster, l1, l2, company_name, revenue, product_count, product_desc_or_at_least_2_product_images, amount_phone_number, telephone, telephone1, amount_emails, email, email1, feedback_final, qualification_feedback, resolution_date, leads_id, prio,pic=''):
